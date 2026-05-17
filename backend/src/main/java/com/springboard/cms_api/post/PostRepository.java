@@ -1,8 +1,6 @@
 package com.springboard.cms_api.post;
 
 import com.springboard.cms_api.post.dto.PostResponse;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
