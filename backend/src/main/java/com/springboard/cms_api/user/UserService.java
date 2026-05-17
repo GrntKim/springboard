@@ -1,0 +1,38 @@
+package com.springboard.cms_api.user;
+
+import com.springboard.cms_api.user.dto.CreateUserRequest;
+import com.springboard.cms_api.user.dto.UserResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public List<UserResponse> getUsers() { return userRepository.findAll(); }
+
+    public void validateDuplicateUsername(String username) {
+        if(userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+    }
+
+    public void createUser(CreateUserRequest request) {
+        validateDuplicateUsername(request.username());
+
+        userRepository.save(
+                request.username(),
+                passwordEncoder.encode(request.password()),
+                request.displayName()
+        );
+    }
+}
