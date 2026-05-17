@@ -1,6 +1,7 @@
 package com.springboard.cms_api.post;
 
 import com.springboard.cms_api.post.dto.CreatePostRequest;
+import com.springboard.cms_api.post.dto.UpdatePostRequest;
 import com.springboard.cms_api.support.ControllerTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,8 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -146,6 +146,60 @@ class PostControllerTest extends ControllerTestSupport {
 
         // when
         ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updatePost_returnsNoContent() throws Exception {
+        // given
+        String url = "/api/posts/{id}";
+        UpdatePostRequest request = new UpdatePostRequest(
+                "Updated title", "Updated content"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(patch(url, testPostId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody));
+
+        // then
+        result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    void updatePost_withBlankTitle_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/posts/{id}";
+        UpdatePostRequest request = new UpdatePostRequest(
+                "", "Updated content"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(patch(url, testPostId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updatePost_withBlankContent_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/posts/{id}";
+        UpdatePostRequest request = new UpdatePostRequest(
+                "Updated title", ""
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(patch(url, testPostId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody));
 

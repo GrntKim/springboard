@@ -2,6 +2,8 @@ package com.springboard.cms_api.post;
 
 import com.springboard.cms_api.post.dto.CreatePostRequest;
 import com.springboard.cms_api.post.dto.PostResponse;
+import com.springboard.cms_api.post.dto.UpdatePostRequest;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +26,14 @@ public class PostService {
     public void createPost(CreatePostRequest request) {
         postRepository.save(
                 request.userId(),
+                request.title(),
+                request.content()
+        );
+    }
+
+    public void updatePost(Long postId, @Valid UpdatePostRequest request) {
+        postRepository.update(
+                postId,
                 request.title(),
                 request.content()
         );

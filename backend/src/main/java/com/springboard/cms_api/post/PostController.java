@@ -2,6 +2,7 @@ package com.springboard.cms_api.post;
 
 import com.springboard.cms_api.post.dto.CreatePostRequest;
 import com.springboard.cms_api.post.dto.PostResponse;
+import com.springboard.cms_api.post.dto.UpdatePostRequest;
 import com.springboard.cms_api.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,7 @@ public class PostController {
 
     private final PostService postService;
 
-    public PostController(PostService postService, UserService userService) {
+    public PostController(PostService postService) {
         this.postService = postService;
     }
 
@@ -36,5 +37,13 @@ public class PostController {
     public ResponseEntity<Void> createPost(@Valid @RequestBody CreatePostRequest request) {
         postService.createPost(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PatchMapping("/{postId}")
+    public ResponseEntity<Void> updatePost(
+            @PathVariable Long postId,
+            @Valid @RequestBody UpdatePostRequest request) {
+        postService.updatePost(postId, request);
+        return ResponseEntity.noContent().build();
     }
 }

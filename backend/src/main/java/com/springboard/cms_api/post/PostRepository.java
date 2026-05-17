@@ -1,6 +1,8 @@
 package com.springboard.cms_api.post;
 
 import com.springboard.cms_api.post.dto.PostResponse;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -65,5 +67,14 @@ public class PostRepository {
                 VALUES (?, ?, ?)
                 """;
         jdbcTemplate.update(sql, userId, title, content);
+    }
+
+    public void update(Long postId, String title, String content) {
+        String sql = """
+                UPDATE posts
+                SET title = ?, content = ?
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, content, title, postId);
     }
 }
