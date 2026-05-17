@@ -14,6 +14,7 @@ services:
       TZ: Asia/Seoul
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "cms_user", "-pcms_password"]
       interval: 5s
