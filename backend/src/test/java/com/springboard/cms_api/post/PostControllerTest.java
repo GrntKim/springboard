@@ -23,22 +23,26 @@ class PostControllerTest extends ControllerTestSupport {
 
     @BeforeEach
     void setUp() {
+        // 1. Add a test user
         jdbcTemplate.update("""
             INSERT INTO users (username, password, display_name)
             VALUES (?, ?, ?)
             """, "post_test_user", "password", "Post Test User");
 
+        // 2. Get that user's ID -> testUserId
         testUserId = jdbcTemplate.queryForObject("""
             SELECT id
             FROM users
             WHERE username = ?
             """, Long.class, "post_test_user");
 
+        // 3. Write a post using that user's ID
         jdbcTemplate.update("""
             INSERT INTO posts (user_id, title, content)
             VALUES (?, ?, ?)
             """, testUserId, "Test Post", "Test Content");
 
+        // 4. Get that post's ID -> testPostId
         testPostId = jdbcTemplate.queryForObject("""
             SELECT id
             FROM posts
