@@ -12,6 +12,16 @@ Response 200
 "Server is running healthy!"
 ```
 
+### GET /db-health
+
+Check db status
+
+Response 200
+
+```json
+"Database is running healthy!"
+```
+
 ## Users
 
 ### GET /api/users
@@ -57,7 +67,7 @@ displayName: required, max 50
 
 ## Posts
 
-### Get /api/posts
+### GET /api/posts
 
 Post list query
 
@@ -72,4 +82,45 @@ Response 200
     "createdAt": "2026-05-17T13:00:00"
   }
 ]
+```
+
+### GET /api/posts/{postId}
+
+Post detail query
+
+Response 200
+
+```json
+{
+  "id": 1,
+  "title": "First post",
+  "content": "Hello Spring JDBC",
+  "authorName": "Admin",
+  "createdAt": "2026-05-17T13:00:00"
+}
+```
+
+### POST /api/posts/{postId}
+
+Create post
+
+Request
+```json
+{
+  "userId": 1,
+  "title": "New Post",
+  "content": "New Content"
+}
+```
+
+Response 201
+```text
+No body
+```
+
+Validation
+```text
+userId: required
+title: required, max 200
+content: required
 ```
