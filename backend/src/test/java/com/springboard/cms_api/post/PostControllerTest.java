@@ -1,17 +1,25 @@
 package com.springboard.cms_api.post;
 
+import com.springboard.cms_api.post.dto.CreatePostRequest;
 import com.springboard.cms_api.support.ControllerTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class PostControllerTest extends ControllerTestSupport {
 
     private Long testPostId;
+    private Long testUserId;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -20,7 +28,7 @@ class PostControllerTest extends ControllerTestSupport {
             VALUES (?, ?, ?)
             """, "post_test_user", "password", "Post Test User");
 
-        Long userId = jdbcTemplate.queryForObject("""
+        testUserId = jdbcTemplate.queryForObject("""
             SELECT id
             FROM users
             WHERE username = ?
@@ -29,7 +37,7 @@ class PostControllerTest extends ControllerTestSupport {
         jdbcTemplate.update("""
             INSERT INTO posts (user_id, title, content)
             VALUES (?, ?, ?)
-            """, userId, "Test Post", "Test Content");
+            """, testUserId, "Test Post", "Test Content");
 
         testPostId = jdbcTemplate.queryForObject("""
             SELECT id
@@ -63,5 +71,25 @@ class PostControllerTest extends ControllerTestSupport {
         // then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(testPostId));
+    }
+
+    @Test
+    void createPost_returnsCreated() throws Exception {
+        // given
+        String url = "/api/posts";
+        CreatePostRequest request = new CreatePostRequest(
+                testUserId,
+                "New Post",
+                "New Content"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isCreated());
     }
 }

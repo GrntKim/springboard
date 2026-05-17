@@ -58,4 +58,12 @@ public class PostRepository {
                 rs.getTimestamp("created_at").toLocalDateTime()
         ), id);
     }
+
+    public void save(Long userId, String title, String content) {
+        String sql = """
+                INSERT INTO posts (user_id, title, content)
+                VALUES (?, ?, ?)
+                """;
+        jdbcTemplate.update(sql, userId, title, content);
+    }
 }

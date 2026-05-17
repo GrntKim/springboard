@@ -1,5 +1,6 @@
 package com.springboard.cms_api.post;
 
+import com.springboard.cms_api.post.dto.CreatePostRequest;
 import com.springboard.cms_api.post.dto.PostResponse;
 import org.springframework.stereotype.Service;
 
@@ -19,4 +20,12 @@ public class PostService {
     }
 
     public PostResponse getPost(Long id) { return postRepository.findById(id); }
+
+    public void createPost(CreatePostRequest request) {
+        postRepository.save(
+                request.userId(),
+                request.title(),
+                request.content()
+        );
+    }
 }
