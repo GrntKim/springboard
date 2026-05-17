@@ -1,0 +1,52 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Environment files
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+**/tmp/
+**/temp/
+**/.tmp/
+*.tmp
+*.temp
+*.log
+
+# Java / Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Spring Boot
+*.pid
+
+# Node / Vite
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vite/
+**/.vite/
+
+# Docker local overrides
+docker-compose.override.yml
+
+# Test / coverage
+coverage/
+**/coverage/
+
+!.env.example
+!**/.env.example

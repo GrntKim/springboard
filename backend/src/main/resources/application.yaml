@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: cms-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/cms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul}
+    username: ${SPRING_DATASOURCE_USERNAME:cms_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:cms_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
