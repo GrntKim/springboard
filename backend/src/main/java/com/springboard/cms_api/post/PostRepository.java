@@ -26,6 +26,7 @@ public class PostRepository {
                     p.created_at
                 FROM posts p
                 JOIN users u ON p.user_id = u.id
+                WHERE p.deleted_at IS NULL
                 ORDER BY p.id DESC
                 """;
         return jdbcTemplate.query(sql, (rs, rowNum) -> new PostResponse(
@@ -47,7 +48,7 @@ public class PostRepository {
                     p.created_at
                 FROM posts p
                 JOIN users u ON p.user_id = u.id
-                WHERE p.id = ?
+                WHERE p.id = ? AND p.deleted_at IS NULL
                 """;
 
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new PostResponse(
@@ -73,6 +74,6 @@ public class PostRepository {
                 SET title = ?, content = ?
                 WHERE id = ?
                 """;
-        jdbcTemplate.update(sql, content, title, postId);
+        jdbcTemplate.update(sql, title, content, postId);
     }
 }
