@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/cms_test?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: cms_user
+    password: cms_password
+    driver-class-name: com.mysql.cj.jdbc.Driver

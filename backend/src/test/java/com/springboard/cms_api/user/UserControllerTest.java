@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
@@ -18,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class UserControllerTest {
 
     private static final String TEST_USERNAME = "test_create_user";
@@ -33,13 +35,24 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.update("DELETE FROM users WHERE username = ?", TEST_USERNAME);
+        jdbcTemplate.update("DELETE FROM comments");
+        jdbcTemplate.update("DELETE FROM posts");
+        jdbcTemplate.update("DELETE FROM users");
+
+        jdbcTemplate.update("ALTER TABLE comments AUTO_INCREMENT = 1");
+        jdbcTemplate.update("ALTER TABLE posts AUTO_INCREMENT = 1");
+        jdbcTemplate.update("ALTER TABLE users AUTO_INCREMENT = 1");
     }
 
     @Test
     void getUsers_returnsOk() throws Exception {
         // given
         String url = "/api/users";
+
+        jdbcTemplate.update("""
+                INSERT INTO users (username, password, display_name)
+                VALUES (?, ?, ?)
+                """, TEST_USERNAME, "password", "User Test");
 
         // when
         ResultActions result = mockMvc.perform(get(url));
@@ -53,7 +66,7 @@ class UserControllerTest {
         // given
         String url = "/api/users";
         CreateUserRequest request = new CreateUserRequest(
-                "test_create_user",
+                TEST_USERNAME,
                 "password1234",
                 "Test User"
         );
@@ -69,7 +82,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createUser_withBlankUserName_returnsBadRequest() throws Exception {
+    void createUser_withBlankUsername_returnsBadRequest() throws Exception {
         // given
         String url = "/api/users";
         CreateUserRequest request = new CreateUserRequest(
