@@ -4,3 +4,6 @@ spring:
     username: cms_user
     password: cms_password
     driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
