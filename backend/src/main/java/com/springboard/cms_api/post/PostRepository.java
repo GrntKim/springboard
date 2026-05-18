@@ -76,4 +76,24 @@ public class PostRepository {
                 """;
         jdbcTemplate.update(sql, title, content, postId);
     }
+
+    public void delete(Long postId) {
+        String sql = """
+                UPDATE posts
+                SET deleted_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, postId);
+    }
+
+    public boolean existsById(Long postId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM posts
+                    WHERE id = ? AND deleted_at IS NULL
+                )""";
+        Integer exists = jdbcTemplate.queryForObject(sql, Integer.class, postId);
+        return exists != null && exists == 1;
+    }
 }

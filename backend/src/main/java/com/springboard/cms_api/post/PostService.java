@@ -4,7 +4,9 @@ import com.springboard.cms_api.post.dto.CreatePostRequest;
 import com.springboard.cms_api.post.dto.PostResponse;
 import com.springboard.cms_api.post.dto.UpdatePostRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -37,5 +39,12 @@ public class PostService {
                 request.title(),
                 request.content()
         );
+    }
+
+    public void deletePost(Long postId) {
+        if(!postRepository.existsById(postId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
+        }
+        postRepository.delete(postId);
     }
 }
