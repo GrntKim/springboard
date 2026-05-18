@@ -26,7 +26,7 @@ public class CommentRepository {
         return exists != null && exists == 1;
     }
 
-    public List<CommentResponse> findAllByPostId(Long id) {
+    public List<CommentResponse> findAllByPostId(Long postId) {
         String sql = """
                 SELECT
                     c.id,
@@ -51,6 +51,33 @@ public class CommentRepository {
                 rs.getString("author_name"),
                 rs.getString("content"),
                 rs.getTimestamp("created_at").toLocalDateTime()
-        ), id);
+        ), postId);
+    }
+
+    public CommentResponse findById(Long commentId) {
+        String sql = """
+                SELECT
+                    c.id,
+                    c.post_id,
+                    c.user_id,
+                    u.display_name AS author_name,
+                    c.content,
+                    c.created_at
+                FROM comments c
+                JOIN posts p ON c.post_id = p.id
+                JOIN users u ON c.user_id = u.id
+                WHERE c.id = ?
+                  AND p.deleted_at IS NULL
+                  AND c.deleted_at IS NULL
+                  AND u.deleted_at IS NULL
+                """;
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new CommentResponse(
+                rs.getLong("id"),
+                rs.getLong("post_id"),
+                rs.getLong("user_id"),
+                rs.getString("author_name"),
+                rs.getString("content"),
+                rs.getTimestamp("created_at").toLocalDateTime()
+        ), commentId);
     }
 }

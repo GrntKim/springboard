@@ -101,4 +101,28 @@ class CommentControllerTest extends ControllerTestSupport {
         // then
         result.andExpect(status().isNotFound());
     }
+
+    @Test
+    void getCommentByCommentId_returnsOk() throws Exception {
+        // given
+        String url = "/api/comments/{commentId}";
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, testCommentId));
+
+        // then
+        result.andExpect(status().isOk());
+    }
+
+    @Test
+    void getCommentByCommentId_withUnknownCommentId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/comments/{commentId}";
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, unknownCommentId));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
 }

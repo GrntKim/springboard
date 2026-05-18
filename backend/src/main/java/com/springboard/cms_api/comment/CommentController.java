@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api")
 public class CommentController {
 
     private final CommentService commentService;
@@ -19,9 +19,15 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    @GetMapping("/{postId}/comments")
+    @GetMapping("/posts/{postId}/comments")
     public  ResponseEntity<List<CommentResponse>> getCommentsByPostId(@PathVariable Long postId) {
         List<CommentResponse> comments = commentService.getCommentsOfThePost(postId);
         return ResponseEntity.ok(comments);
+    }
+
+    @GetMapping("/comments/{commentId}")
+    public ResponseEntity<CommentResponse> getCommentByCommentId(@PathVariable Long commentId) {
+        CommentResponse comment = commentService.getCommentById(commentId);
+        return ResponseEntity.ok(comment);
     }
 }

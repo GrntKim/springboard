@@ -40,8 +40,13 @@ public class CommentService {
         }
     }
 
-    public List<CommentResponse> getCommentsOfThePost(Long id) {
-        validatePostIdExists(id);
-        return commentRepository.findAllByPostId(id);
+    public List<CommentResponse> getCommentsOfThePost(Long postId) {
+        validatePostIdExists(postId);
+        return commentRepository.findAllByPostId(postId);
+    }
+
+    public CommentResponse getCommentById(Long commentId) {
+        validateCommentIdExists(commentId);
+        return commentRepository.findById(commentId);
     }
 }
