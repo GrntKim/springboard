@@ -1,0 +1,27 @@
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.5rem;
+    border-bottom: 1px solid black;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+    padding: 0.5rem;
+    transition-duration: 0.2s;
+}
+
+a:hover,
+.site-links a.active {
+    box-shadow: inset 0 0 0 1px black; 
+    border-radius: 3px;
+}
+
+ul {
+    list-style: none;
+    display: flex;
+    padding: 0 0.5rem;
+    gap: 1rem;
+}
