@@ -3,7 +3,6 @@ package com.springboard.cms_api.post;
 import com.springboard.cms_api.post.dto.CreatePostRequest;
 import com.springboard.cms_api.post.dto.PostResponse;
 import com.springboard.cms_api.post.dto.UpdatePostRequest;
-import com.springboard.cms_api.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

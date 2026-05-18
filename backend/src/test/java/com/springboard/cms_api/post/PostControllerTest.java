@@ -50,7 +50,6 @@ class PostControllerTest extends ControllerTestSupport {
             """, Long.class, "Test Post");
     }
 
-
     @Test
     void getPosts_returnsOk() throws Exception {
         // given
@@ -75,6 +74,19 @@ class PostControllerTest extends ControllerTestSupport {
         // then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(testPostId));
+    }
+
+    @Test
+    void getPost_withUnknownId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/posts/{id}";
+        Long unknownPostId = testPostId + 999L;
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, unknownPostId));
+
+        // then
+        result.andExpect(status().isNotFound());
     }
 
     @Test
@@ -156,6 +168,27 @@ class PostControllerTest extends ControllerTestSupport {
     }
 
     @Test
+    void createPost_withUnknownUserId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/posts";
+        Long unknownUserId = testUserId + 999L;
+        CreatePostRequest request = new CreatePostRequest(
+                unknownUserId,
+                "New title",
+                "New content"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
     void updatePost_returnsNoContent() throws Exception {
         // given
         String url = "/api/posts/{id}";
@@ -210,6 +243,25 @@ class PostControllerTest extends ControllerTestSupport {
     }
 
     @Test
+    void updatePost_withUnknownPostId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/posts/{id}";
+        Long unknownPostId = testPostId + 999L;
+        UpdatePostRequest request = new UpdatePostRequest(
+                "New title", "New content"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, unknownPostId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
     void deletePost_returnsNoContent() throws Exception {
         // given
         String url = "/api/posts/{id}";
@@ -225,9 +277,10 @@ class PostControllerTest extends ControllerTestSupport {
     void deletePost_withUnknownId_returnsNotFound() throws Exception {
         // given
         String url = "/api/posts/{id}";
+        Long unknownPostId = testPostId + 999L;
 
         // when
-        ResultActions result = mockMvc.perform(delete(url, testUserId+999L));
+        ResultActions result = mockMvc.perform(delete(url, unknownPostId));
 
         // then
         result.andExpect(status().isNotFound());

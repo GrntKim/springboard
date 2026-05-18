@@ -43,6 +43,19 @@ public class UserRepository {
         return exists != null && exists == 1;
     }
 
+    public boolean existsById(Long id) {
+        String sql = """
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM users
+                    WHERE id = ?
+                )""";
+
+        Integer exists = jdbcTemplate.queryForObject(sql, Integer.class, id);
+
+        return exists != null && exists == 1;
+    }
+
     public void save(String username, String password, String displayName) {
         String sql = """
                 INSERT INTO users (username, password, display_name)
