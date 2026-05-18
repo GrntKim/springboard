@@ -1,6 +1,7 @@
 package com.springboard.cms_api.user;
 
 import com.springboard.cms_api.user.dto.CreateUserRequest;
+import com.springboard.cms_api.user.dto.UpdateUserRequest;
 import com.springboard.cms_api.user.dto.UserResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -35,5 +36,19 @@ public class UserController {
     public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserRequest request) {
         userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRequest request) {
+        userService.updateUser(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

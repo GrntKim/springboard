@@ -2,6 +2,7 @@ package com.springboard.cms_api.user;
 
 import com.springboard.cms_api.support.ControllerTestSupport;
 import com.springboard.cms_api.user.dto.CreateUserRequest;
+import com.springboard.cms_api.user.dto.UpdateUserRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,14 +10,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class UserControllerTest extends ControllerTestSupport {
 
     private Long testUserId;
+    private Long unknownUserId;
     private String testUserName;
 
     @Autowired
@@ -27,8 +28,9 @@ class UserControllerTest extends ControllerTestSupport {
         // 1. Add a test user
         jdbcTemplate.update("""
             INSERT INTO users (username, password, display_name)
-            VALUES (?, ?, ?)
-            """, "post_test_user", "password", "Post Test User");
+            VALUES (?, ?, ?), (?, ?, ?)
+            """, "post_test_user", "password", "Post Test User",
+                "already_existing_user", "password1", "Existing user");
 
         // 2. Get that user's ID -> testUserId
         testUserId = jdbcTemplate.queryForObject("""
@@ -43,6 +45,9 @@ class UserControllerTest extends ControllerTestSupport {
             FROM users
             WHERE id = ?
             """, String.class, testUserId);
+
+        // 4. Setup unknown user ID
+        unknownUserId = testUserId + 999L;
     }
 
     @Test
@@ -75,7 +80,6 @@ class UserControllerTest extends ControllerTestSupport {
     void getUser_withUnknownUserId_returnsNotFound() throws Exception {
         // given
         String url = "/api/users/{id}";
-        Long unknownUserId = testUserId + 999L;
 
         // when
         ResultActions result = mockMvc.perform(get(url, unknownUserId));
@@ -174,5 +178,164 @@ class UserControllerTest extends ControllerTestSupport {
 
         // then
         result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateUser_returnsOk() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+        UpdateUserRequest request = new UpdateUserRequest(
+                "new_user_name",
+                "new_password",
+                "new_display_name"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, testUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    void updateUser_withUnknownUserId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+        UpdateUserRequest request = new UpdateUserRequest(
+                "new_user_name",
+                "new_password",
+                "new_display_name"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, unknownUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateUser_withDuplicateUserName_returnsConflict() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+        UpdateUserRequest request = new UpdateUserRequest(
+                "already_existing_user",
+                "new_password",
+                "new_display_name"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, testUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isConflict());
+    }
+
+    @Test
+    void updateUser_withBlankUserName_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+        UpdateUserRequest request = new UpdateUserRequest(
+                "",
+                "new_password",
+                "new_display_name"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, testUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateUser_withBlankPassword_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+        UpdateUserRequest request = new UpdateUserRequest(
+                "new_username",
+                "",
+                "new_display_name"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, testUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateUser_withBlankDisplayName_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+        UpdateUserRequest request = new UpdateUserRequest(
+                "new_username",
+                "new_password",
+                ""
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, testUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteUser_returnsNoContent() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+
+        // when
+        ResultActions result = mockMvc.perform(delete(url, testUserId));
+
+        // then
+        result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteUser_withUnknownUserID_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+
+        // when
+        ResultActions result = mockMvc.perform(delete(url, unknownUserId));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteUser_excludesUserFromList() throws Exception {
+        // given
+        String deleteUrl = "/api/users/{id}";
+        mockMvc.perform(delete(deleteUrl, testUserId)).andExpect(status().isNoContent());
+        String getUrl = "/api/users";
+
+        // when
+        ResultActions result = mockMvc.perform(get(getUrl));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == " + testUserId + ")]").doesNotExist());
     }
 }

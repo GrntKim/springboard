@@ -1,6 +1,8 @@
 package com.springboard.cms_api.user;
 
+import com.springboard.cms_api.user.dto.UpdateUserRequest;
 import com.springboard.cms_api.user.dto.UserResponse;
+import jakarta.validation.Valid;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +21,7 @@ public class UserRepository {
         String sql = """
                 SELECT id, username, display_name, created_at
                 FROM users
+                WHERE deleted_at IS NULL
                 ORDER BY id DESC
                 """;
 
@@ -34,7 +37,7 @@ public class UserRepository {
         String sql = """
                 SELECT id, username, display_name, created_at
                 FROM users
-                WHERE id = ?
+                WHERE id = ? AND deleted_at IS NULL
                 """;
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new UserResponse(
                 rs.getLong("id"),
@@ -49,7 +52,7 @@ public class UserRepository {
                 SELECT EXISTS(
                     SELECT 1
                     FROM users
-                    WHERE username = ?
+                    WHERE username = ? AND deleted_at IS NULL
                 )""";
 
         Integer exists = jdbcTemplate.queryForObject(sql, Integer.class, username);
@@ -62,7 +65,7 @@ public class UserRepository {
                 SELECT EXISTS(
                     SELECT 1
                     FROM users
-                    WHERE id = ?
+                    WHERE id = ? AND deleted_at IS NULL
                 )""";
 
         Integer exists = jdbcTemplate.queryForObject(sql, Integer.class, id);
@@ -79,4 +82,24 @@ public class UserRepository {
         jdbcTemplate.update(sql, username, password, displayName);
     }
 
+    public void update(Long id, String username, String password, String displayName) {
+        String sql = """
+                UPDATE users
+                SET username = ?,
+                    password = ?,
+                    display_name = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, username, password, displayName, id);
+    }
+
+    public void delete(Long id) {
+        String sql = """
+                UPDATE users
+                SET deleted_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, id);
+    }
 }
