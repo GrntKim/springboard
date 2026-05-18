@@ -22,22 +22,29 @@ public class PostService {
         this.userRepository = userRepository;
     }
 
+    public void validatePostIdExists(Long id) {
+        if(!postRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
+        }
+    }
+
+    public void validateUserIdExists(Long id) {
+        if(!userRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+    }
+
     public List<PostResponse> getPosts() {
         return postRepository.findAll();
     }
 
     public PostResponse getPost(Long id) {
-        if(!postRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
-        }
+        validatePostIdExists(id);
         return postRepository.findById(id);
     }
 
     public void createPost(CreatePostRequest request) {
-        if(!userRepository.existsById(request.userId())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-
+        validateUserIdExists(request.userId());
         postRepository.save(
                 request.userId(),
                 request.title(),
@@ -45,22 +52,17 @@ public class PostService {
         );
     }
 
-    public void updatePost(Long postId, @Valid UpdatePostRequest request) {
-        if(!postRepository.existsById(postId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
-        }
-
+    public void updatePost(Long id, @Valid UpdatePostRequest request) {
+        validatePostIdExists(id);
         postRepository.update(
-                postId,
+                id,
                 request.title(),
                 request.content()
         );
     }
 
-    public void deletePost(Long postId) {
-        if(!postRepository.existsById(postId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
-        }
-        postRepository.delete(postId);
+    public void deletePost(Long id) {
+        validatePostIdExists(id);
+        postRepository.delete(id);
     }
 }
