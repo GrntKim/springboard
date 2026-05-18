@@ -2,6 +2,7 @@ package com.springboard.cms_api.user;
 
 import com.springboard.cms_api.support.ControllerTestSupport;
 import com.springboard.cms_api.user.dto.CreateUserRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -10,30 +11,69 @@ import tools.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class UserControllerTest extends ControllerTestSupport {
 
-    private static final String TEST_USERNAME = "test_create_user";
+    private Long testUserId;
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        // 1. Add a test user
+        jdbcTemplate.update("""
+            INSERT INTO users (username, password, display_name)
+            VALUES (?, ?, ?)
+            """, "post_test_user", "password", "Post Test User");
+
+        // 2. Get that user's ID -> testUserId
+        testUserId = jdbcTemplate.queryForObject("""
+            SELECT id
+            FROM users
+            WHERE username = ?
+            """, Long.class, "post_test_user");
+    }
 
     @Test
     void getUsers_returnsOk() throws Exception {
         // given
         String url = "/api/users";
 
-        jdbcTemplate.update("""
-                INSERT INTO users (username, password, display_name)
-                VALUES (?, ?, ?)
-                """, TEST_USERNAME, "password", "User Test");
-
         // when
         ResultActions result = mockMvc.perform(get(url));
 
         // then
-        result.andExpect(status().isOk());
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getUser_returnsOk() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, testUserId));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(testUserId));
+    }
+
+    @Test
+    void getUser_withUnknownUserId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/users/{id}";
+        Long unknownUserId = testUserId + 999L;
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, unknownUserId));
+
+        // then
+        result.andExpect(status().isNotFound());
     }
 
     @Test
@@ -41,7 +81,7 @@ class UserControllerTest extends ControllerTestSupport {
         // given
         String url = "/api/users";
         CreateUserRequest request = new CreateUserRequest(
-                TEST_USERNAME,
+                "test_user_name",
                 "password1234",
                 "Test User"
         );

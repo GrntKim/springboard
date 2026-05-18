@@ -30,6 +30,20 @@ public class UserRepository {
         ));
     }
 
+    public UserResponse findById(Long id) {
+        String sql = """
+                SELECT id, username, display_name, created_at
+                FROM users
+                WHERE id = ?
+                """;
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new UserResponse(
+                rs.getLong("id"),
+                rs.getString("username"),
+                rs.getString("display_name"),
+                rs.getTimestamp("created_at").toLocalDateTime()
+        ), id);
+    }
+
     public boolean existsByUsername(String username) {
         String sql = """
                 SELECT EXISTS(
@@ -64,4 +78,5 @@ public class UserRepository {
 
         jdbcTemplate.update(sql, username, password, displayName);
     }
+
 }
