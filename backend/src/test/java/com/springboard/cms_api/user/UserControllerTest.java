@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest extends ControllerTestSupport {
 
     private Long testUserId;
+    private String testUserName;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -35,6 +36,13 @@ class UserControllerTest extends ControllerTestSupport {
             FROM users
             WHERE username = ?
             """, Long.class, "post_test_user");
+
+        // 3. Get that user's name -> testUserName
+        testUserName = jdbcTemplate.queryForObject("""
+            SELECT username
+            FROM users
+            WHERE id = ?
+            """, String.class, testUserId);
     }
 
     @Test
@@ -81,7 +89,7 @@ class UserControllerTest extends ControllerTestSupport {
         // given
         String url = "/api/users";
         CreateUserRequest request = new CreateUserRequest(
-                "test_user_name",
+                "new_user_name",
                 "password1234",
                 "Test User"
         );
@@ -94,6 +102,24 @@ class UserControllerTest extends ControllerTestSupport {
 
         // then
         result.andExpect(status().isCreated());
+    }
+
+    @Test
+    void createUser_withDuplicateUsername_returnsConflict() throws Exception {
+        // given
+        String url = "/api/users";
+        CreateUserRequest request = new CreateUserRequest(
+                testUserName, "password1234", "Test User"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isConflict());
     }
 
     @Test
