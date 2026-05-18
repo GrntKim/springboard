@@ -2,8 +2,14 @@ package com.springboard.cms_api.comment;
 
 import com.springboard.cms_api.support.ControllerTestSupport;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class CommentControllerTest extends ControllerTestSupport {
 
@@ -69,5 +75,30 @@ class CommentControllerTest extends ControllerTestSupport {
         // 7. setup unknown IDs
         unknownCommentId = testCommentId + 999L;
         unknownPostId = testPostId + 999L;
+    }
+
+    @Test
+    void getCommentsByPostId_returnsOk() throws Exception {
+        // given
+        String url = "/api/posts/{postId}/comments";
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, testPostId));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getCommentsByPostId_withUnknownPostId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/posts/{postId}/comments";
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, unknownPostId));
+
+        // then
+        result.andExpect(status().isNotFound());
     }
 }
