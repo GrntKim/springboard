@@ -117,10 +117,61 @@ Response 201
 ```text
 No body
 ```
-
 Validation
 ```text
 userId: required
 title: required, max 200
 content: required
+```
+Error
+```text
+404 Not Found: user does not exist
+```
+
+### PUT /api/posts/{postId}
+
+Update post
+
+Request
+```json
+{
+  "title": "Updated title",
+  "content": "Updated content"
+}
+```
+Response 204
+```text
+No body
+```
+Validation
+```text
+title: required, max 200
+content: required
+```
+Error
+```text
+404 Not Found: post does not exist
+```
+
+### DELETE /api/posts/{postId}
+
+Delete post
+
+Request 
+```text
+No body
+```
+Response 204 
+```text
+No body
+```
+
+Error
+```text
+404 Not Found: post does not exist
+```
+
+Note
+```text 
+Soft delete: the post is not physically deleted. deleted_at is set, and deleted posts are excluded from normal queries.
 ```
