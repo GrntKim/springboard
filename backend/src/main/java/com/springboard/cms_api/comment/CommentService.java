@@ -2,6 +2,7 @@ package com.springboard.cms_api.comment;
 
 import com.springboard.cms_api.comment.dto.CommentResponse;
 import com.springboard.cms_api.comment.dto.CreateCommentRequest;
+import com.springboard.cms_api.comment.dto.UpdateCommentRequest;
 import com.springboard.cms_api.post.PostRepository;
 import com.springboard.cms_api.user.UserRepository;
 import jakarta.validation.Valid;
@@ -60,5 +61,10 @@ public class CommentService {
                 request.userId(),
                 request.content()
         );
+    }
+
+    public void updateComment(Long commentId, @Valid UpdateCommentRequest request) {
+        validateCommentIdExists(commentId);
+        commentRepository.update(commentId, request.content());
     }
 }

@@ -1,8 +1,6 @@
 package com.springboard.cms_api.comment;
 
 import com.springboard.cms_api.comment.dto.CommentResponse;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -89,5 +87,15 @@ public class CommentRepository {
                 VALUES (?, ?, ?)
                 """;
         jdbcTemplate.update(sql, postId, userId, content);
+    }
+
+    public void update(Long commentId, String content) {
+        String sql = """
+                UPDATE comments
+                SET content = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, content, commentId);
     }
 }
