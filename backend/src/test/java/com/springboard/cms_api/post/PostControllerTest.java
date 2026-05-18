@@ -165,7 +165,7 @@ class PostControllerTest extends ControllerTestSupport {
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when
-        ResultActions result = mockMvc.perform(patch(url, testPostId)
+        ResultActions result = mockMvc.perform(put(url, testPostId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody));
 
@@ -183,7 +183,7 @@ class PostControllerTest extends ControllerTestSupport {
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when
-        ResultActions result = mockMvc.perform(patch(url, testPostId)
+        ResultActions result = mockMvc.perform(put(url, testPostId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody));
 
@@ -201,7 +201,7 @@ class PostControllerTest extends ControllerTestSupport {
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when
-        ResultActions result = mockMvc.perform(patch(url, testPostId)
+        ResultActions result = mockMvc.perform(put(url, testPostId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody));
 

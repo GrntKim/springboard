@@ -39,7 +39,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PatchMapping("/{postId}")
+    @PutMapping("/{postId}")
     public ResponseEntity<Void> updatePost(
             @PathVariable Long postId,
             @Valid @RequestBody UpdatePostRequest request) {
