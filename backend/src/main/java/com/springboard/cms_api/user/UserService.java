@@ -31,7 +31,7 @@ public class UserService {
 
     public void validateDuplicateUsername(String username) {
         if(userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("Username already exists.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists.");
         }
     }
 
