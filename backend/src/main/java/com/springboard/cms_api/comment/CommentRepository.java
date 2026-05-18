@@ -1,6 +1,8 @@
 package com.springboard.cms_api.comment;
 
 import com.springboard.cms_api.comment.dto.CommentResponse;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -79,5 +81,13 @@ public class CommentRepository {
                 rs.getString("content"),
                 rs.getTimestamp("created_at").toLocalDateTime()
         ), commentId);
+    }
+
+    public void save(Long postId, Long userId, String content) {
+        String sql = """
+                INSERT INTO comments (post_id, user_id, content)
+                VALUES (?, ?, ?)
+                """;
+        jdbcTemplate.update(sql, postId, userId, content);
     }
 }

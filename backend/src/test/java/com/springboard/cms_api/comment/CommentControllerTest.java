@@ -1,13 +1,16 @@
 package com.springboard.cms_api.comment;
 
+import com.springboard.cms_api.comment.dto.CreateCommentRequest;
 import com.springboard.cms_api.support.ControllerTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,6 +27,7 @@ class CommentControllerTest extends ControllerTestSupport {
 
     private Long unknownCommentId;
     private Long unknownPostId;
+    private Long unknownUserId;
 
     @BeforeEach
     void setUp() {
@@ -75,6 +79,7 @@ class CommentControllerTest extends ControllerTestSupport {
         // 7. setup unknown IDs
         unknownCommentId = testCommentId + 999L;
         unknownPostId = testPostId + 999L;
+        unknownUserId = postWriterId + 999L;
     }
 
     @Test
@@ -121,6 +126,126 @@ class CommentControllerTest extends ControllerTestSupport {
 
         // when
         ResultActions result = mockMvc.perform(get(url, unknownCommentId));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createComment_returnsCreated() throws Exception {
+        // given
+        String url = "/api/comments";
+        CreateCommentRequest request = new CreateCommentRequest(
+                testPostId,
+                commentWriterId,
+                "Comment content"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isCreated());
+    }
+
+    @Test
+    void createComment_withBlankTitle_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/comments";
+        CreateCommentRequest request = new CreateCommentRequest(
+                testPostId,
+                commentWriterId,
+                ""
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createComment_withNullPostId_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/comments";
+        CreateCommentRequest request = new CreateCommentRequest(
+                null,
+                commentWriterId,
+                ""
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createComment_withUnknownPostId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/comments";
+        CreateCommentRequest request = new CreateCommentRequest(
+                unknownPostId,
+                commentWriterId,
+                "Comment content"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createComment_withNullUserId_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/comments";
+        CreateCommentRequest request = new CreateCommentRequest(
+                testPostId,
+                null,
+                ""
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createComment_withUnknownUserId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/comments";
+        CreateCommentRequest request = new CreateCommentRequest(
+                testPostId,
+                unknownUserId,
+                "Comment content"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
         // then
         result.andExpect(status().isNotFound());

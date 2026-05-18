@@ -1,8 +1,10 @@
 package com.springboard.cms_api.comment;
 
 import com.springboard.cms_api.comment.dto.CommentResponse;
+import com.springboard.cms_api.comment.dto.CreateCommentRequest;
 import com.springboard.cms_api.post.PostRepository;
 import com.springboard.cms_api.user.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -48,5 +50,15 @@ public class CommentService {
     public CommentResponse getCommentById(Long commentId) {
         validateCommentIdExists(commentId);
         return commentRepository.findById(commentId);
+    }
+
+    public void createComment(@Valid CreateCommentRequest request) {
+        validatePostIdExists(request.postId());
+        validateUserIdExists(request.userId());
+        commentRepository.save(
+                request.postId(),
+                request.userId(),
+                request.content()
+        );
     }
 }

@@ -1,4 +1,16 @@
 package com.springboard.cms_api.comment.dto;
 
-public record CreateCommentRequest() {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record CreateCommentRequest(
+        @NotNull
+        Long postId,
+
+        @NotNull
+        Long userId,
+
+        @NotBlank
+        String content
+) {
 }
