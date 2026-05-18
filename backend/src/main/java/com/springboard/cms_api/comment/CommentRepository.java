@@ -26,6 +26,33 @@ public class CommentRepository {
         return exists != null && exists == 1;
     }
 
+    public List<CommentResponse> findAll() {
+        String sql = """
+                SELECT
+                    c.id,
+                    c.post_id,
+                    c.user_id,
+                    u.display_name AS author_name,
+                    c.content,
+                    c.created_at
+                FROM comments c
+                JOIN posts p ON c.post_id = p.id
+                JOIN users u ON c.user_id = u.id
+                WHERE p.deleted_at IS NULL
+                  AND c.deleted_at IS NULL
+                  AND u.deleted_at IS NULL
+                ORDER BY c.id DESC
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new CommentResponse(
+                rs.getLong("id"),
+                rs.getLong("post_id"),
+                rs.getLong("user_id"),
+                rs.getString("author_name"),
+                rs.getString("content"),
+                rs.getTimestamp("created_at").toLocalDateTime()
+        ));
+    }
+
     public List<CommentResponse> findAllByPostId(Long postId) {
         String sql = """
                 SELECT
@@ -98,4 +125,14 @@ public class CommentRepository {
                 """;
         jdbcTemplate.update(sql, content, commentId);
     }
+
+    public void delete(Long commentId) {
+        String sql = """
+                UPDATE comments
+                SET deleted_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, commentId);
+    }
+
 }

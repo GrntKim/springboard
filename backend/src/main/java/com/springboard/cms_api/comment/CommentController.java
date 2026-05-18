@@ -20,8 +20,14 @@ public class CommentController {
         this.commentService = commentService;
     }
 
+    @GetMapping("/comments")
+    public ResponseEntity<List<CommentResponse>> getAllComments() {
+        List<CommentResponse> comments = commentService.getAllComments();
+        return ResponseEntity.ok(comments);
+    }
+
     @GetMapping("/posts/{postId}/comments")
-    public  ResponseEntity<List<CommentResponse>> getCommentsByPostId(@PathVariable Long postId) {
+    public ResponseEntity<List<CommentResponse>> getCommentsByPostId(@PathVariable Long postId) {
         List<CommentResponse> comments = commentService.getCommentsOfThePost(postId);
         return ResponseEntity.ok(comments);
     }
@@ -46,6 +52,12 @@ public class CommentController {
             @Valid @RequestBody UpdateCommentRequest request
             ) {
         commentService.updateComment(commentId, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
+        commentService.deleteComment(commentId);
         return ResponseEntity.noContent().build();
     }
 }

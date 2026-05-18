@@ -83,6 +83,19 @@ class CommentControllerTest extends ControllerTestSupport {
     }
 
     @Test
+    void getAllComments_returnsOk() throws Exception {
+        // given
+        String url = "/api/comments";
+
+        // when
+        ResultActions result = mockMvc.perform(get(url));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
     void getCommentsByPostId_returnsOk() throws Exception {
         // given
         String url = "/api/posts/{postId}/comments";
@@ -152,7 +165,7 @@ class CommentControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void createComment_withBlankTitle_returnsBadRequest() throws Exception {
+    void createComment_withBlankContent_returnsBadRequest() throws Exception {
         // given
         String url = "/api/comments";
         CreateCommentRequest request = new CreateCommentRequest(
@@ -178,7 +191,7 @@ class CommentControllerTest extends ControllerTestSupport {
         CreateCommentRequest request = new CreateCommentRequest(
                 null,
                 commentWriterId,
-                ""
+                "Comment content"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -218,7 +231,7 @@ class CommentControllerTest extends ControllerTestSupport {
         CreateCommentRequest request = new CreateCommentRequest(
                 testPostId,
                 null,
-                ""
+                "Comment content"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -297,5 +310,44 @@ class CommentControllerTest extends ControllerTestSupport {
 
         // then
         result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteComment_returnsNoContent() throws Exception {
+        // given
+        String url = "/api/comments/{id}";
+
+        // when
+        ResultActions result = mockMvc.perform(delete(url, testCommentId));
+
+        // then
+        result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteComment_withUnknownCommentId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/comments/{id}";
+
+        // when
+        ResultActions result = mockMvc.perform(delete(url, unknownCommentId));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteComment_excludesCommentFromList() throws Exception {
+        // given
+        String deleteUrl = "/api/comments/{commentId}";
+        mockMvc.perform(delete(deleteUrl, testCommentId)).andExpect(status().isNoContent());
+        String getUrl = "/api/comments";
+
+        // when
+        ResultActions result = mockMvc.perform(get(getUrl));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == " + testCommentId + ")]").doesNotExist());
     }
 }

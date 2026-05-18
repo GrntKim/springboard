@@ -43,6 +43,10 @@ public class CommentService {
         }
     }
 
+    public List<CommentResponse> getAllComments() {
+        return commentRepository.findAll();
+    }
+
     public List<CommentResponse> getCommentsOfThePost(Long postId) {
         validatePostIdExists(postId);
         return commentRepository.findAllByPostId(postId);
@@ -67,4 +71,10 @@ public class CommentService {
         validateCommentIdExists(commentId);
         commentRepository.update(commentId, request.content());
     }
+
+    public void deleteComment(Long commentId) {
+        validateCommentIdExists(commentId);
+        commentRepository.delete(commentId);
+    }
+
 }
