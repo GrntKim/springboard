@@ -7,6 +7,7 @@ type Post = {
     id: number;
     title: string;
     content: string;
+    authorId: number;
     authorName: string;
     createdAt: string;
 };
@@ -39,11 +40,21 @@ export default function PostListPage() {
                 Posts
             </h1>
             <div className="page-content">
-                <ul>
-                    {posts.map((post) => (
-                        <li key={post.id}><Link to={`/posts/${post.id}`}>{post.title}</Link> by {post.authorName}</li>
-                    ))}
-                </ul>
+                {posts.length === 0 ? (
+                        <p>No posts yet..</p>
+                    ) : (
+                        <ul className="post-list">
+                            {posts.map((post) => (
+                                    <li key={post.id}>
+                                        <p>
+                                            <Link to={`/posts/${post.id}`}>{post.title} </Link> 
+                                            by
+                                            <Link to={`/users/${post.authorId}`}> {post.authorName}</Link>
+                                        </p>
+                                    </li>
+                            ))}
+                        </ul>
+                    )}
             </div>
             {message && <p>{message}</p>}
         </div>

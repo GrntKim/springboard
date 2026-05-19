@@ -7,6 +7,7 @@ type Post = {
     id: number;
     title: string;
     content: string;
+    authorId: number;
     authorName: string;
     createdAt: string;
 };
@@ -88,19 +89,19 @@ export default function UserDetailPage() {
                 <h1 className="page-title">
                     {user.displayName}'s Posts
                 </h1>
-                    {posts.length === 0 ? (
-                        <p>No posts yet..</p>
-                    ) : (
-                        <ul className="user-post-list">
-                            {posts.map((post) => (
-                                    <li key={post.id}>
-                                        <Link to={`/posts/${post.id}`}>
-                                            {post.title}
-                                        </Link>
-                                    </li>
-                            ))}
-                        </ul>
-                    )}
+                {posts.length === 0 ? (
+                    <p>No posts yet..</p>
+                ) : (
+                    <ul className="user-post-list">
+                        {posts.map((post) => (
+                                <li key={post.id}>
+                                    <Link to={`/posts/${post.id}`}>
+                                        {post.title}
+                                    </Link>
+                                </li>
+                        ))}
+                    </ul>
+                )}
             </div>
             {message && <p>{message}</p>}
         </div>
