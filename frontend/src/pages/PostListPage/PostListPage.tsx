@@ -40,7 +40,7 @@ export default function PostListPage() {
             <div className="page-content">
                 <ul>
                     {posts.map((post) => (
-                        <li key={post.id}>{post.title} - {post.authorName}</li>
+                        <li key={post.id}>{post.title} by {post.authorName}</li>
                     ))}
                 </ul>
             </div>

@@ -3,10 +3,10 @@ import { useState } from "react";
 import "../pages.css";
 
 export default function RegisterPage() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [displayName, setDisplayName] = useState("");
-    const [message, setMessage] = useState("");
+    const [username, setUsername] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [displayName, setDisplayName] = useState<string>("");
+    const [message, setMessage] = useState<string>("");
 
     async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
