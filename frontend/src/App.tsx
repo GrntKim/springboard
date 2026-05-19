@@ -7,6 +7,7 @@ import Header from './layouts/Header/Header';
 import Footer from './layouts/Footer/Footer';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import UserListPage from './pages/UserListPage/UserListPage';
+import PostDetailPage from './pages/PostDetailPage/PostDetailPage';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path='/write' element={<PostWritePage />} />
           <Route path='/register' element={<RegisterPage />} />
           <Route path='/users' element={<UserListPage />} />
+          <Route path='/posts/:postId' element={<PostDetailPage />} />
         </Routes>
       </div>
       <Footer />

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "../pages.css";
 
@@ -11,15 +11,16 @@ type Post = {
     createdAt: string;
 };
 
-export default function PostListPage() {
-    const [posts, setPosts] = useState<Post[]>([]);
+export default function PostDetailPage() {
+    const { postId } = useParams();
+    const [post, setPost] = useState<Post | null>(null);
     const [message, setMessage] = useState<string>("");
 
     useEffect(() => {
-        const fetchPosts = async () => {
+        const fetchPost = async () => {
             try {
-                const res = await axios.get<Post[]>("/api/posts");
-                setPosts(res.data);
+                const res = await axios.get<Post>(`/api/posts/${postId}`);
+                setPost(res.data);
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     if (error.response?.status === 500) {
@@ -31,21 +32,28 @@ export default function PostListPage() {
                 }
             }
         }
-        fetchPosts();
-    }, []);
+        fetchPost();
+    }, [postId]);
+
+    if (message) {
+        return <p>{message}</p>
+    }
+
+    if (!post) {
+        return <p>Loading...</p>
+    }
+
     return (
         <div className="main">
             <h1 className="page-title">
-                Post list page
+                {post.title}
             </h1>
             <div className="page-content">
-                <ul>
-                    {posts.map((post) => (
-                        <li key={post.id}><Link to={`/posts/${post.id}`}>{post.title}</Link> by {post.authorName}</li>
-                    ))}
-                </ul>
+                <p>Author: {post.authorName}</p>
+                <p>Created at: {post.createdAt}</p>
+                <p>{post.content}</p>
+                <Link to={"/posts"}>Go back</Link>
             </div>
-            {message && <p>{message}</p>}
         </div>
     );
 }
