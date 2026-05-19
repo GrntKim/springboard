@@ -1,5 +1,4 @@
 import { Route, Routes } from 'react-router-dom';
-import './App.css'
 import MainPage from './pages/MainPage/MainPage';
 import PostListPage from './pages/PostListPage/PostListPage';
 import PostWritePage from './pages/PostWritePage/PostWritePage';
@@ -8,6 +7,8 @@ import Footer from './layouts/Footer/Footer';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import UserListPage from './pages/UserListPage/UserListPage';
 import PostDetailPage from './pages/PostDetailPage/PostDetailPage';
+import UserDetailPage from './pages/UserDetailPage/UserDetailPage';
+import './App.css';
 
 function App() {
   return (
@@ -17,10 +18,11 @@ function App() {
         <Routes>
           <Route path='/' element={<MainPage />} />
           <Route path='/posts' element={<PostListPage />} />
+          <Route path='/posts/:postId' element={<PostDetailPage />} />
+          <Route path='/users' element={<UserListPage />} />
+          <Route path='/users/:userId' element={<UserDetailPage />} />
           <Route path='/write' element={<PostWritePage />} />
           <Route path='/register' element={<RegisterPage />} />
-          <Route path='/users' element={<UserListPage />} />
-          <Route path='/posts/:postId' element={<PostDetailPage />} />
         </Routes>
       </div>
       <Footer />

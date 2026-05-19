@@ -41,7 +41,7 @@ export default function PostWritePage() {
     return (
         <div className="main">
             <h1 className="page-title">
-                Post write page
+                Write your post
             </h1>
             <div className="page-content">
                 <form onSubmit={handleSubmit}>

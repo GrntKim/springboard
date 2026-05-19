@@ -42,7 +42,7 @@ export default function RegisterPage() {
     return (
         <div className="main">
             <h1 className="page-title">
-                User register page
+                Register
             </h1>
 
             <div className="page-content">

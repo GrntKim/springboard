@@ -36,7 +36,7 @@ export default function PostListPage() {
     return (
         <div className="main">
             <h1 className="page-title">
-                Post list page
+                Posts
             </h1>
             <div className="page-content">
                 <ul>
