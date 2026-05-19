@@ -1,16 +1,8 @@
 import { Link } from "react-router-dom";
+import { type Comment } from "../../../../api/comments";
 
 type CommentListProps = {
     comments: Comment[];
-};
-
-type Comment = {
-    id: number;
-    postId: number;
-    userId: number;
-    authorName: string;
-    content: string;
-    createdAt: string
 };
 
 export default function CommentList({ comments }: CommentListProps) {

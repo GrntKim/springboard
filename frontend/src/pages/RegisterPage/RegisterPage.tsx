@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import "../pages.css";
+import { createUser } from "../../api/users";
 
 export default function RegisterPage() {
     const [username, setUsername] = useState<string>("");
@@ -12,7 +13,7 @@ export default function RegisterPage() {
         event.preventDefault();
 
         try {
-            await axios.post("/api/users", {
+            await createUser({
                 username,
                 password,
                 displayName,

@@ -1,27 +1,11 @@
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import "../pages.css";
+import { type Post, getPostByPostId } from "../../api/posts";
+import { type Comment, getCommentsByPostId } from "../../api/comments";
 import CommentList from "./Components/CommentList/CommentList";
 import CommentForm from "./Components/CommentForm/CommentForm";
-
-type Post = {
-    id: number;
-    title: string;
-    content: string;
-    authorId: number;
-    authorName: string;
-    createdAt: string;
-};
-
-type Comment = {
-    id: number;
-    postId: number;
-    userId: number;
-    authorName: string;
-    content: string;
-    createdAt: string
-};
+import "../pages.css";
 
 export default function PostDetailPage() {
     const { postId } = useParams();
@@ -31,8 +15,8 @@ export default function PostDetailPage() {
 
     const fetchComments = async (postId: number) => {
         try {
-            const res = await axios.get<Comment[]>(`/api/posts/${postId}/comments`);
-            setComments(res.data);
+            const comments = await getCommentsByPostId(postId);
+            setComments(comments);
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error.response?.status === 500) {
@@ -55,8 +39,8 @@ export default function PostDetailPage() {
 
         const fetchPost = async () => {
             try {
-                const res = await axios.get<Post>(`/api/posts/${numericPostId}`);
-                setPost(res.data);
+                const post = await getPostByPostId(numericPostId);
+                setPost(post);
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     if (error.response?.status === 500) {

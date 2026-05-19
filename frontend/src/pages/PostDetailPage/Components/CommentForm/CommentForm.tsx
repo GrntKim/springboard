@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
+import { createComment } from "../../../../api/comments";
 
 type CommentFormProps = {
     postId: number;
@@ -15,11 +16,11 @@ export default function CommentForm({ postId, onCreated }: CommentFormProps) {
         event.preventDefault();
 
         try {
-            await axios.post("/api/comments", {
+            await createComment({
                 postId,
                 userId: Number(userId),
                 content,
-            });
+            })
 
             setMessage("Comment created successfully.");
             setUserId("");

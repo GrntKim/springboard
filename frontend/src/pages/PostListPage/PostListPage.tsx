@@ -1,16 +1,7 @@
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "../pages.css";
-
-type Post = {
-    id: number;
-    title: string;
-    content: string;
-    authorId: number;
-    authorName: string;
-    createdAt: string;
-};
+import { getPosts, type Post } from "../../api/posts";
 
 export default function PostListPage() {
     const [posts, setPosts] = useState<Post[]>([]);
@@ -19,19 +10,13 @@ export default function PostListPage() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const res = await axios.get<Post[]>("/api/posts");
-                setPosts(res.data);
-            } catch (error) {
-                if (axios.isAxiosError(error)) {
-                    if (error.response?.status === 500) {
-                        setMessage("Bad Request.");
-                        return;
-                    }
-
-                    setMessage("Something went wrong.");
-                }
+                const posts = await getPosts();
+                setPosts(posts);
+            } catch {
+                setMessage("Something went wrong");
             }
-        }
+        };
+
         fetchPosts();
     }, []);
     return (
@@ -45,13 +30,13 @@ export default function PostListPage() {
                     ) : (
                         <ul className="post-list">
                             {posts.map((post) => (
-                                    <li key={post.id}>
-                                        <p>
-                                            <Link to={`/posts/${post.id}`}>{post.title} </Link> 
-                                            by
-                                            <Link to={`/users/${post.authorId}`}> {post.authorName}</Link>
-                                        </p>
-                                    </li>
+                                <li key={post.id}>
+                                    <p>
+                                        <Link to={`/posts/${post.id}`}>{post.title} </Link> 
+                                        by
+                                        <Link to={`/users/${post.authorId}`}> {post.authorName}</Link>
+                                    </p>
+                                </li>
                             ))}
                         </ul>
                     )}

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import "../pages.css";
+import { createPost } from "../../api/posts";
 
 export default function PostWritePage() {
     const [userId, setUserId] = useState("");
@@ -12,7 +13,7 @@ export default function PostWritePage() {
         event.preventDefault();
 
         try {
-            await axios.post("/api/posts", {
+            await createPost({
                 userId: Number(userId),
                 title,
                 content,

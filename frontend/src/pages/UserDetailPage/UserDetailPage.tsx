@@ -1,23 +1,9 @@
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { type Post, getPostsByUserId } from "../../api/posts";
+import { type User, getUser } from "../../api/users";
 import "../pages.css";
-
-type Post = {
-    id: number;
-    title: string;
-    content: string;
-    authorId: number;
-    authorName: string;
-    createdAt: string;
-};
-
-type User = {
-    id: number;
-    username: string;
-    displayName: string;
-    createdAt: string;
-}
 
 export default function UserDetailPage() {
     const { userId } = useParams();
@@ -26,10 +12,10 @@ export default function UserDetailPage() {
     const [message, setMessage] = useState<string>("");
 
     useEffect(() => {
-        const getUser = async () => {
+        const fetchUser = async (userId: number) => {
             try {
-                const res = await axios.get<User>(`/api/users/${userId}`);
-                setUser(res.data);
+                const user = await getUser(userId);
+                setUser(user);
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     if (error.response?.status === 500) {
@@ -49,8 +35,8 @@ export default function UserDetailPage() {
 
         const fetchPostsByUserId = async (userId: number) => {
             try {
-                const res = await axios.get<Post[]>(`/api/users/${userId}/posts`);
-                setPosts(res.data);
+                const posts = await getPostsByUserId(userId);
+                setPosts(posts);
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     if (error.response?.status === 500) {
@@ -62,7 +48,7 @@ export default function UserDetailPage() {
                 }
             }
         }
-        getUser();
+        fetchUser(Number(userId));
         fetchPostsByUserId(Number(userId));
     }, [userId]);
 

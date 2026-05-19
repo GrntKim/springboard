@@ -1,14 +1,8 @@
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { type User, getUsers } from "../../api/users";
 import "../pages.css";
-
-type User = {
-    id: number;
-    username: string;
-    displayName: string;
-    createdAt: string;
-}
 
 export default function UserListPage() {
     const [users, setUsers] = useState<User[]>([]);
@@ -17,8 +11,8 @@ export default function UserListPage() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await axios.get<User[]>("/api/users");
-                setUsers(res.data);
+                const users = await getUsers();
+                setUsers(users);
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     if (error.response?.status === 500) {
@@ -32,6 +26,7 @@ export default function UserListPage() {
 
         fetchUsers();
     }, []);
+
     return (
         <div className="main">
             <h1 className="page-title">
