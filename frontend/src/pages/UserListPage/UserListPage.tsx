@@ -1,6 +1,6 @@
 import "../pages.css";
 
-export default function PostListPage() {
+export default function UserListPage() {
     return (
         <div className="main">
             <h1 className="page-title">

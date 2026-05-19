@@ -13,6 +13,8 @@ export default function Header() {
                     <li><NavLink to={"/"}>Main</NavLink></li>
                     <li><NavLink to={"/posts"}>Posts</NavLink></li>
                     <li><NavLink to={"/write"}>Write</NavLink></li>
+                    <li><NavLink to={"/users"}>Users</NavLink></li>
+                    <li><NavLink to={"/register"}>Register</NavLink></li>
                 </ul>
             </div>
         </header>
