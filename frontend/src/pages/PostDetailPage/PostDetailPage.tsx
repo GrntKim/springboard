@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { type Post, getPostByPostId } from "../../api/posts";
+import { type Post, getPostById } from "../../api/posts";
 import { type Comment, getCommentsByPostId } from "../../api/comments";
 import CommentList from "./Components/CommentList/CommentList";
 import CommentForm from "./Components/CommentForm/CommentForm";
@@ -29,17 +29,12 @@ export default function PostDetailPage() {
         }
     }
 
+    const numericPostId = Number(postId);
+
     useEffect(() => {
-        if (!postId) {
-            setMessage("Invalid post id.");
-            return;
-        }
-
-        const numericPostId = Number(postId);
-
         const fetchPost = async () => {
             try {
-                const post = await getPostByPostId(numericPostId);
+                const post = await getPostById(numericPostId);
                 setPost(post);
             } catch (error) {
                 if (axios.isAxiosError(error)) {
@@ -56,6 +51,10 @@ export default function PostDetailPage() {
         fetchPost();
         fetchComments(numericPostId);
     }, [postId]);
+
+    if (!postId || Number.isNaN(numericPostId)) {
+        return <p>Invalid post id.</p>;
+    }
 
     if (message) {
         return <p>{message}</p>

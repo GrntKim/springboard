@@ -15,12 +15,17 @@ export type CreatePostRequest = {
     content: string;
 };
 
+export type UpdatePostRequest = {
+    title: string;
+    content: string;
+}
+
 export async function getPosts() {
     const res = await apiClient.get<Post[]>("/posts");
     return res.data;
 }
 
-export async function getPostByPostId(postId: number) {
+export async function getPostById(postId: number) {
     const res = await apiClient.get<Post>(`/posts/${postId}`);
     return res.data;
 }
@@ -30,6 +35,14 @@ export async function getPostsByUserId(userId: number) {
     return res.data;
 }
 
-export async function createPost(request: CreatePostRequest) {
+export async function createPost(request: CreatePostRequest): Promise<void> {
     await apiClient.post("/posts", request);
+}
+
+export async function updatePost(postId: number, request: UpdatePostRequest): Promise<void> {
+    await apiClient.put(`/posts/${postId}`, request);
+}
+
+export async function deletePost(postId: number): Promise<void> {
+    await apiClient.delete(`/posts/${postId}`);
 }

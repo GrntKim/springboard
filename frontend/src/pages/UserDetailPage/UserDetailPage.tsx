@@ -2,7 +2,7 @@ import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { type Post, getPostsByUserId } from "../../api/posts";
-import { type User, getUser } from "../../api/users";
+import { type User, getUserById } from "../../api/users";
 import "../pages.css";
 
 export default function UserDetailPage() {
@@ -14,7 +14,7 @@ export default function UserDetailPage() {
     useEffect(() => {
         const fetchUser = async (userId: number) => {
             try {
-                const user = await getUser(userId);
+                const user = await getUserById(userId);
                 setUser(user);
             } catch (error) {
                 if (axios.isAxiosError(error)) {
