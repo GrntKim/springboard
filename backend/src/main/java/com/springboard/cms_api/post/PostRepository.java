@@ -22,6 +22,7 @@ public class PostRepository {
                     p.id,
                     p.title,
                     p.content,
+                    p.user_id AS author_id,
                     u.display_name AS author_name,
                     p.created_at
                 FROM posts p
@@ -33,6 +34,7 @@ public class PostRepository {
                 rs.getLong("id"),
                 rs.getString("title"),
                 rs.getString("content"),
+                rs.getLong("author_id"),
                 rs.getString("author_name"),
                 rs.getTimestamp("created_at").toLocalDateTime()
         ));
@@ -44,6 +46,7 @@ public class PostRepository {
                     p.id,
                     p.title,
                     p.content,
+                    p.user_id AS author_id,
                     u.display_name AS author_name,
                     p.created_at
                 FROM posts p
@@ -55,6 +58,7 @@ public class PostRepository {
                 rs.getLong("id"),
                 rs.getString("title"),
                 rs.getString("content"),
+                rs.getLong("author_id"),
                 rs.getString("author_name"),
                 rs.getTimestamp("created_at").toLocalDateTime()
         ), userId);
@@ -66,6 +70,7 @@ public class PostRepository {
                     p.id,
                     p.title,
                     p.content,
+                    p.user_id AS author_id,
                     u.display_name AS author_name,
                     p.created_at
                 FROM posts p
@@ -77,6 +82,7 @@ public class PostRepository {
                 rs.getLong("id"),
                 rs.getString("title"),
                 rs.getString("content"),
+                rs.getLong("author_id"),
                 rs.getString("author_name"),
                 rs.getTimestamp("created_at").toLocalDateTime()
         ), id);
