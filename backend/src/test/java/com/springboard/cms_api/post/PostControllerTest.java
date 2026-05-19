@@ -18,6 +18,7 @@ class PostControllerTest extends ControllerTestSupport {
 
     private Long testPostId;
     private Long testUserId;
+    private Long unknownUserId;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -48,6 +49,9 @@ class PostControllerTest extends ControllerTestSupport {
             FROM posts
             WHERE title = ?
             """, Long.class, "Test Post");
+
+        // 5. Set unknown User ID for testing edge cases
+        unknownUserId = testUserId + 999L;
     }
 
     @Test
@@ -84,6 +88,31 @@ class PostControllerTest extends ControllerTestSupport {
 
         // when
         ResultActions result = mockMvc.perform(get(url, unknownPostId));
+
+        // then
+        result.andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getPostsByUserId_returnsOk() throws Exception {
+        // given
+        String url = "/api/users/{userId}/posts";
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, testUserId));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getPostsByUserId_withUnknownUserId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/users/{userId}/posts";
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, unknownUserId));
 
         // then
         result.andExpect(status().isNotFound());

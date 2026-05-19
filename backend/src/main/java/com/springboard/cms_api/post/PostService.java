@@ -38,6 +38,11 @@ public class PostService {
         return postRepository.findAll();
     }
 
+    public List<PostResponse> getPostsByUserId(Long userId) {
+        validateUserIdExists(userId);
+        return postRepository.findAllByUserId(userId);
+    }
+
     public PostResponse getPost(Long id) {
         validatePostIdExists(id);
         return postRepository.findById(id);
@@ -65,4 +70,5 @@ public class PostService {
         validatePostIdExists(id);
         postRepository.delete(id);
     }
+
 }

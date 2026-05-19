@@ -38,6 +38,28 @@ public class PostRepository {
         ));
     }
 
+    public List<PostResponse> findAllByUserId(Long userId) {
+        String sql = """
+                SELECT
+                    p.id,
+                    p.title,
+                    p.content,
+                    u.display_name AS author_name,
+                    p.created_at
+                FROM posts p
+                JOIN users u ON p.user_id = u.id
+                WHERE p.user_id = ? AND p.deleted_at IS NULL
+                """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new PostResponse(
+                rs.getLong("id"),
+                rs.getString("title"),
+                rs.getString("content"),
+                rs.getString("author_name"),
+                rs.getTimestamp("created_at").toLocalDateTime()
+        ), userId);
+    }
+
     public PostResponse findById(Long id) {
         String sql = """
                 SELECT
@@ -96,4 +118,5 @@ public class PostRepository {
         Integer exists = jdbcTemplate.queryForObject(sql, Integer.class, postId);
         return exists != null && exists == 1;
     }
+
 }
