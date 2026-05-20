@@ -1,44 +1,31 @@
-import axios from "axios";
 import { useState } from "react";
 import "../pages.css";
 import { createPost } from "../../api/posts";
+import { API_ERROR_MESSAGE, getApiErrorMessage, HTTP_STATUS } from "../../api/error";
 
 export default function PostWritePage() {
-    const [userId, setUserId] = useState("");
-    const [title, setTitle] = useState("");
-    const [content, setContent] = useState("");
-    const [message, setMessage] = useState("");
+    const [userId, setUserId] = useState<string>("");
+    const [title, setTitle] = useState<string>("");
+    const [content, setContent] = useState<string>("");
+    const [message, setMessage] = useState<string>("");
 
-    async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+    function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
-
-        try {
-            await createPost({
-                userId: Number(userId),
-                title,
-                content,
+        createPost({ userId: Number(userId), title, content, })
+            .then(() => {
+                setMessage("Post created successfully.");
+                setUserId("");
+                setTitle("");
+                setContent(""); 
+            })
+            .catch((error) => {
+                setMessage(getApiErrorMessage(error, {
+                    [HTTP_STATUS.NOT_FOUND]: "User not found",
+                    [HTTP_STATUS.BAD_REQUEST]: API_ERROR_MESSAGE.BAD_REQUEST,
+                }));
             });
-
-            setMessage("Post created successfully.");
-            setUserId("");
-            setTitle("");
-            setContent("");
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                if (error.response?.status === 404) {
-                    setMessage("User not found.");
-                    return;
-                }
-
-                if (error.response?.status === 400) {
-                    setMessage("Please check your input.");
-                    return;
-                }
-
-                setMessage("Something went wrong.");
-            }
-        }
     }
+
     return (
         <div className="main">
             <h1 className="page-title">
@@ -51,6 +38,7 @@ export default function PostWritePage() {
                         <input
                             id="userId"
                             name="userId"
+                            type="number"
                             value={userId}
                             onChange={(event) => setUserId(event.target.value)}
                         />

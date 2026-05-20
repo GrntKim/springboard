@@ -1,8 +1,8 @@
-import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { type Post, getPostById } from "../../api/posts";
 import { type Comment, getCommentsByPostId } from "../../api/comments";
+import { getApiErrorMessage } from "../../api/error";
 import CommentList from "./Components/CommentList/CommentList";
 import CommentForm from "./Components/CommentForm/CommentForm";
 import "../pages.css";
@@ -13,44 +13,35 @@ export default function PostDetailPage() {
     const [comments, setComments] = useState<Comment[]>([]);
     const [message, setMessage] = useState<string>("");
 
-    const fetchComments = async (postId: number) => {
-        try {
-            const comments = await getCommentsByPostId(postId);
-            setComments(comments);
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                if (error.response?.status === 500) {
-                    setMessage("Bad Request.");
-                    return;
-                }
-
-                setMessage("Something went wrong.");
-            }
-        }
+    const reloadComments = (postId: number) => {
+        getCommentsByPostId(postId)
+            .then(setComments)
+            .catch((error) => {
+                setMessage(getApiErrorMessage(error));
+            });
     }
 
     const numericPostId = Number(postId);
 
     useEffect(() => {
-        const fetchPost = async () => {
-            try {
-                const post = await getPostById(numericPostId);
+        if (!postId || Number.isNaN(numericPostId)) return;
+
+        getPostById(numericPostId)
+            .then((post) => {
                 setPost(post);
-            } catch (error) {
-                if (axios.isAxiosError(error)) {
-                    if (error.response?.status === 500) {
-                        setMessage("Bad Request.");
-                        return;
-                    }
-
-                    setMessage("Something went wrong.");
-                }
-            }
-        }
-
-        fetchPost();
-        fetchComments(numericPostId);
-    }, [postId]);
+            })
+            .catch((error) => {
+                setMessage(getApiErrorMessage(error));
+            });
+        
+        getCommentsByPostId(numericPostId)
+            .then((comments) => {
+                setComments(comments);
+            })
+            .catch((error) => {
+                setMessage(getApiErrorMessage(error));
+            });
+    }, [postId, numericPostId]);
 
     if (!postId || Number.isNaN(numericPostId)) {
         return <p>Invalid post id.</p>;
@@ -77,8 +68,8 @@ export default function PostDetailPage() {
 
                 <div className="comment-section">
                     <CommentForm 
-                        postId={Number(postId)} 
-                        onCreated={() => fetchComments(post.id)}
+                        postId={numericPostId} 
+                        onCreated={() => reloadComments(numericPostId)}
                     />
                     <CommentList comments={comments} />
                 </div>

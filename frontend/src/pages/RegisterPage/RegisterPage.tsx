@@ -1,7 +1,7 @@
-import axios from "axios";
 import { useState } from "react";
 import "../pages.css";
 import { createUser } from "../../api/users";
+import { API_ERROR_MESSAGE, getApiErrorMessage, HTTP_STATUS } from "../../api/error";
 
 export default function RegisterPage() {
     const [username, setUsername] = useState<string>("");
@@ -9,35 +9,21 @@ export default function RegisterPage() {
     const [displayName, setDisplayName] = useState<string>("");
     const [message, setMessage] = useState<string>("");
 
-    async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+    function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
-
-        try {
-            await createUser({
-                username,
-                password,
-                displayName,
+        createUser({ username, password, displayName, })
+            .then(() => {
+                setMessage("User registered successfully.");
+                setUsername("");
+                setPassword("");
+                setDisplayName("");
+            })
+            .catch((error) => { 
+                setMessage(getApiErrorMessage(error, {
+                    [HTTP_STATUS.BAD_REQUEST]: API_ERROR_MESSAGE.BAD_REQUEST,
+                    [HTTP_STATUS.CONFLICT]: "Username already exists.",
+                }));
             });
-
-            setMessage("User registered successfully.");
-            setUsername("");
-            setPassword("");
-            setDisplayName("");
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                if (error.response?.status === 409) {
-                    setMessage("Username already exists.");
-                    return;
-                }
-
-                if (error.response?.status === 400) {
-                    setMessage("Please check your input.");
-                    return;
-                }
-
-                setMessage("Something went wrong.");
-            }
-        }
     }
 
     return (
@@ -62,6 +48,7 @@ export default function RegisterPage() {
                         <input
                             id="password"
                             name="password"
+                            type="password"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
                         />
@@ -79,7 +66,7 @@ export default function RegisterPage() {
                 </form>
                 
                 {message && <p>{message}</p>}
-                        </div>
             </div>
+        </div>
     )
 }

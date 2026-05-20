@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useState } from "react";
 import { createComment } from "../../../../api/comments";
+import { API_ERROR_MESSAGE, getApiErrorMessage, HTTP_STATUS } from "../../../../api/error";
 
 type CommentFormProps = {
     postId: number;
@@ -12,29 +12,21 @@ export default function CommentForm({ postId, onCreated }: CommentFormProps) {
     const [content, setContent] = useState<string>("");
     const [message, setMessage] = useState<string>("");
 
-    const handleSubmit = async(event: React.SubmitEvent<HTMLFormElement>) => {
+    function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
-
-        try {
-            await createComment({
-                postId,
-                userId: Number(userId),
-                content,
+        createComment({ postId, userId: Number(userId), content, })
+            .then(() => {
+                setMessage("Comment created successfully.");
+                setUserId("");
+                setContent("");
+                onCreated();
             })
-
-            setMessage("Comment created successfully.");
-            setUserId("");
-            setContent("");
-            onCreated();
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                if (error.response?.status === 400) {
-                    setMessage("Please check your input.");
-                    return;
-                }
-                setMessage("Something went wrong.");
-            }
-        }
+            .catch((error) => {
+                setMessage(getApiErrorMessage(error, {
+                    [HTTP_STATUS.NOT_FOUND]: "User not found",
+                    [HTTP_STATUS.BAD_REQUEST]: API_ERROR_MESSAGE.BAD_REQUEST,
+                }));
+            });
     }
 
     return (

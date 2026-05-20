@@ -2,22 +2,18 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "../pages.css";
 import { getPosts, type Post } from "../../api/posts";
+import { getApiErrorMessage } from "../../api/error";
 
 export default function PostListPage() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [message, setMessage] = useState<string>("");
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const posts = await getPosts();
-                setPosts(posts);
-            } catch {
-                setMessage("Something went wrong");
-            }
-        };
-
-        fetchPosts();
+        getPosts()
+            .then(setPosts)
+            .catch((error) => {
+                setMessage(getApiErrorMessage(error));
+            });
     }, []);
     return (
         <div className="main">
