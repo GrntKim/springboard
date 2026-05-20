@@ -1,6 +1,5 @@
 package com.springboard.cms_api.auth;
 
-import com.springboard.cms_api.auth.dto.CurrentUserResponse;
 import com.springboard.cms_api.auth.dto.LoginRequest;
 import com.springboard.cms_api.auth.dto.RegisterRequest;
 import com.springboard.cms_api.support.ControllerTestSupport;
@@ -13,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -297,5 +297,18 @@ class AuthControllerTest extends ControllerTestSupport {
 
         // then
         result.andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logout_withSession_returnsNoContentAndInvalidatesSession() throws Exception {
+        // given
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("LOGIN_USER_ID", testUserId);
+
+        // when & then
+        mockMvc.perform(post("/api/auth/logout")
+                .session(session))
+                .andExpect(status().isNoContent());
+        assertTrue(session.isInvalid());
     }
 }

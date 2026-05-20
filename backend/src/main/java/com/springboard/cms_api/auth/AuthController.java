@@ -72,4 +72,16 @@ public class AuthController {
         CurrentUserResponse response = authService.getCurrentUser(session);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "Logout")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Logout successful")
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            HttpSession session
+    ) {
+        authService.logout(session);
+        return ResponseEntity.noContent().build();
+    }
 }

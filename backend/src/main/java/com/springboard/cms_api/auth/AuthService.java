@@ -58,4 +58,8 @@ public class AuthService {
                 user.nickname()
         );
     }
+
+    public void logout(HttpSession session) {
+        session.invalidate();
+    }
 }
