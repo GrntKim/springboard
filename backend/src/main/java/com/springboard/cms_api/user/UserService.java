@@ -53,8 +53,8 @@ public class UserService {
     }
 
     public void updateUser(Long id, @Valid UpdateUserRequest request) {
-        String encodedPassword = passwordEncoder.encode(request.password());
         validateUserIdExists(id);
+        String encodedPassword = passwordEncoder.encode(request.password());
         validateDuplicateUsername(request.username());
         userRepository.update(
                 id,
