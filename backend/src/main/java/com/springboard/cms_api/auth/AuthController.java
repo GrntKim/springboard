@@ -1,5 +1,6 @@
 package com.springboard.cms_api.auth;
 
+import com.springboard.cms_api.auth.dto.CurrentUserResponse;
 import com.springboard.cms_api.auth.dto.LoginRequest;
 import com.springboard.cms_api.auth.dto.RegisterRequest;
 import com.springboard.cms_api.user.UserService;
@@ -11,10 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -60,5 +58,18 @@ public class AuthController {
     ) {
         authService.login(request, session);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get current user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Current user returned"),
+            @ApiResponse(responseCode = "401", description = "Login required")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<CurrentUserResponse> getCurrentUser(
+            HttpSession session
+    ) {
+        CurrentUserResponse response = authService.getCurrentUser(session);
+        return ResponseEntity.ok(response);
     }
 }

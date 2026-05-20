@@ -1,5 +1,6 @@
 package com.springboard.cms_api.auth;
 
+import com.springboard.cms_api.auth.dto.CurrentUserResponse;
 import com.springboard.cms_api.auth.dto.LoginRequest;
 import com.springboard.cms_api.auth.dto.RegisterRequest;
 import com.springboard.cms_api.support.ControllerTestSupport;
@@ -7,11 +8,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class AuthControllerTest extends ControllerTestSupport {
@@ -23,12 +27,17 @@ class AuthControllerTest extends ControllerTestSupport {
     PasswordEncoder passwordEncoder;
 
     private Long testUserId;
+    private Long unknownTestUserId;
     private String testLoginId;
+    private String testNickName;
     private String rawPassword;
+    @Autowired
+    private AuthService authService;
 
     @BeforeEach
     void setUp() {
         testLoginId = "auth_test_user";
+        testNickName = "Auth Test User";
         rawPassword = "password1234";
 
         jdbcTemplate.update("""
@@ -37,7 +46,7 @@ class AuthControllerTest extends ControllerTestSupport {
             """,
                 testLoginId,
                 passwordEncoder.encode(rawPassword),
-                "Auth Test User"
+                testNickName
         );
 
         testUserId = jdbcTemplate.queryForObject("""
@@ -45,6 +54,8 @@ class AuthControllerTest extends ControllerTestSupport {
             FROM users
             WHERE login_id = ?
             """, Long.class, testLoginId);
+
+        unknownTestUserId = testUserId + 999L;
     }
 
     @Test
@@ -260,5 +271,31 @@ class AuthControllerTest extends ControllerTestSupport {
 
         // then
         result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void me_withAuthenticatedSession_returnsCurrentUser() throws Exception {
+        // given
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("LOGIN_USER_ID", testUserId);
+
+        // when
+        ResultActions result = mockMvc.perform(get("/api/auth/me")
+                .session(session));
+
+        // then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(testUserId))
+                .andExpect(jsonPath("$.loginId").value(testLoginId))
+                .andExpect(jsonPath("$.nickname").value(testNickName));
+    }
+
+    @Test
+    void me_withUnauthenticatedSession_returnsUnauthorized() throws Exception {
+        // when
+        ResultActions result = mockMvc.perform(get("/api/auth/me"));
+
+        // then
+        result.andExpect(status().isUnauthorized());
     }
 }

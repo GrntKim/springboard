@@ -1,8 +1,10 @@
 package com.springboard.cms_api.auth;
 
+import com.springboard.cms_api.auth.dto.CurrentUserResponse;
 import com.springboard.cms_api.auth.dto.LoginRequest;
 import com.springboard.cms_api.user.UserAccount;
 import com.springboard.cms_api.user.UserRepository;
+import com.springboard.cms_api.user.dto.UserResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -36,5 +38,24 @@ public class AuthService {
             );
         }
         session.setAttribute(LOGIN_USER_ID, user.id());
+    }
+
+    public CurrentUserResponse getCurrentUser(HttpSession session) {
+        Long userId = (Long) session.getAttribute(LOGIN_USER_ID);
+
+        if (userId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Login required."
+            );
+        }
+
+        UserResponse user = userRepository.findById(userId);
+
+        return new CurrentUserResponse(
+                user.id(),
+                user.loginId(),
+                user.nickname()
+        );
     }
 }
