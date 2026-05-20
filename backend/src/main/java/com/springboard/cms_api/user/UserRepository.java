@@ -19,7 +19,7 @@ public class UserRepository {
 
     public List<UserResponse> findAll() {
         String sql = """
-                SELECT id, username, display_name, created_at
+                SELECT id, login_id, nickname, created_at
                 FROM users
                 WHERE deleted_at IS NULL
                 ORDER BY id DESC
@@ -27,35 +27,35 @@ public class UserRepository {
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> new UserResponse(
                 rs.getLong("id"),
-                rs.getString("username"),
-                rs.getString("display_name"),
+                rs.getString("login_id"),
+                rs.getString("nickname"),
                 rs.getTimestamp("created_at").toLocalDateTime()
         ));
     }
 
     public UserResponse findById(Long id) {
         String sql = """
-                SELECT id, username, display_name, created_at
+                SELECT id, login_id, nickname, created_at
                 FROM users
                 WHERE id = ? AND deleted_at IS NULL
                 """;
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new UserResponse(
                 rs.getLong("id"),
-                rs.getString("username"),
-                rs.getString("display_name"),
+                rs.getString("login_id"),
+                rs.getString("nickname"),
                 rs.getTimestamp("created_at").toLocalDateTime()
         ), id);
     }
 
-    public boolean existsByUsername(String username) {
+    public boolean existsByLoginId(String loginId) {
         String sql = """
                 SELECT EXISTS(
                     SELECT 1
                     FROM users
-                    WHERE username = ? AND deleted_at IS NULL
+                    WHERE login_id = ? AND deleted_at IS NULL
                 )""";
 
-        Integer exists = jdbcTemplate.queryForObject(sql, Integer.class, username);
+        Integer exists = jdbcTemplate.queryForObject(sql, Integer.class, loginId);
 
         return exists != null && exists == 1;
     }
@@ -73,25 +73,25 @@ public class UserRepository {
         return exists != null && exists == 1;
     }
 
-    public void save(String username, String password, String displayName) {
+    public void save(String loginId, String password, String nickname) {
         String sql = """
-                INSERT INTO users (username, password, display_name)
+                INSERT INTO users (login_id, password, nickname)
                 VALUES (?, ?, ?)
                 """;
 
-        jdbcTemplate.update(sql, username, password, displayName);
+        jdbcTemplate.update(sql, loginId, password, nickname);
     }
 
-    public void update(Long id, String username, String password, String displayName) {
+    public void update(Long id, String loginId, String password, String nickname) {
         String sql = """
                 UPDATE users
-                SET username = ?,
+                SET login_id = ?,
                     password = ?,
-                    display_name = ?,
+                    nickname = ?,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """;
-        jdbcTemplate.update(sql, username, password, displayName, id);
+        jdbcTemplate.update(sql, loginId, password, nickname, id);
     }
 
     public void delete(Long id) {

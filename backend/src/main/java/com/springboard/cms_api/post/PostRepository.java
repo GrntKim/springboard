@@ -23,7 +23,7 @@ public class PostRepository {
                     p.title,
                     p.content,
                     p.user_id AS author_id,
-                    u.display_name AS author_name,
+                    u.nickname AS author_name,
                     p.created_at
                 FROM posts p
                 JOIN users u ON p.user_id = u.id
@@ -47,7 +47,7 @@ public class PostRepository {
                     p.title,
                     p.content,
                     p.user_id AS author_id,
-                    u.display_name AS author_name,
+                    u.nickname AS author_name,
                     p.created_at
                 FROM posts p
                 JOIN users u ON p.user_id = u.id
@@ -71,7 +71,7 @@ public class PostRepository {
                     p.title,
                     p.content,
                     p.user_id AS author_id,
-                    u.display_name AS author_name,
+                    u.nickname AS author_name,
                     p.created_at
                 FROM posts p
                 JOIN users u ON p.user_id = u.id

@@ -26,7 +26,7 @@ class PostControllerTest extends ControllerTestSupport {
     void setUp() {
         // 1. Add a test user
         jdbcTemplate.update("""
-            INSERT INTO users (username, password, display_name)
+            INSERT INTO users (login_id, password, nickname)
             VALUES (?, ?, ?)
             """, "post_test_user", "password", "Post Test User");
 
@@ -34,7 +34,7 @@ class PostControllerTest extends ControllerTestSupport {
         testUserId = jdbcTemplate.queryForObject("""
             SELECT id
             FROM users
-            WHERE username = ?
+            WHERE login_id = ?
             """, Long.class, "post_test_user");
 
         // 3. Write a post using that user's ID

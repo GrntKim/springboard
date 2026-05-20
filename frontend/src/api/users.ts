@@ -2,21 +2,21 @@ import { apiClient } from "./client";
 
 export type User = {
     id: number;
-    username: string;
-    displayName: string;
+    loginId: string;
+    nickname: string;
     createdAt: string;
 };
 
 export type CreateUserRequest = {
-    username: string;
+    loginId: string;
     password: string;
-    displayName: string;
+    nickname: string;
 };
 
 export type UpdateUserRequest = {
-    username: string;
+    loginId: string;
     password: string;
-    displayName: string;
+    nickname: string;
 }
 
 export async function getUsers() {

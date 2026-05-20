@@ -18,7 +18,7 @@ class UserControllerTest extends ControllerTestSupport {
 
     private Long testUserId;
     private Long unknownUserId;
-    private String testUserName;
+    private String testLoginId;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -27,7 +27,7 @@ class UserControllerTest extends ControllerTestSupport {
     void setUp() {
         // 1. Add a test user
         jdbcTemplate.update("""
-            INSERT INTO users (username, password, display_name)
+            INSERT INTO users (login_id, password, nickname)
             VALUES (?, ?, ?), (?, ?, ?)
             """, "post_test_user", "password", "Post Test User",
                 "already_existing_user", "password1", "Existing user");
@@ -36,12 +36,12 @@ class UserControllerTest extends ControllerTestSupport {
         testUserId = jdbcTemplate.queryForObject("""
             SELECT id
             FROM users
-            WHERE username = ?
+            WHERE login_id = ?
             """, Long.class, "post_test_user");
 
-        // 3. Get that user's name -> testUserName
-        testUserName = jdbcTemplate.queryForObject("""
-            SELECT username
+        // 3. Get that user's login id -> testLoginId
+        testLoginId = jdbcTemplate.queryForObject("""
+            SELECT login_id
             FROM users
             WHERE id = ?
             """, String.class, testUserId);
@@ -109,11 +109,11 @@ class UserControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void createUser_withDuplicateUsername_returnsConflict() throws Exception {
+    void createUser_withDuplicateLoginId_returnsConflict() throws Exception {
         // given
         String url = "/api/users";
         CreateUserRequest request = new CreateUserRequest(
-                testUserName, "password1234", "Test User"
+                testLoginId, "password1234", "Test User"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -127,7 +127,7 @@ class UserControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void createUser_withBlankUsername_returnsBadRequest() throws Exception {
+    void createUser_withBlankLoginId_returnsBadRequest() throws Exception {
         // given
         String url = "/api/users";
         CreateUserRequest request = new CreateUserRequest(
@@ -145,7 +145,7 @@ class UserControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void createUser_withBlankDisplayName_returnsBadRequest() throws Exception {
+    void createUser_withBlankNickname_returnsBadRequest() throws Exception {
         // given
         String url = "/api/users";
         CreateUserRequest request = new CreateUserRequest(
@@ -187,7 +187,7 @@ class UserControllerTest extends ControllerTestSupport {
         UpdateUserRequest request = new UpdateUserRequest(
                 "new_user_name",
                 "new_password",
-                "new_display_name"
+                "new_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -207,7 +207,7 @@ class UserControllerTest extends ControllerTestSupport {
         UpdateUserRequest request = new UpdateUserRequest(
                 "new_user_name",
                 "new_password",
-                "new_display_name"
+                "new_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -221,13 +221,13 @@ class UserControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void updateUser_withDuplicateUserName_returnsConflict() throws Exception {
+    void updateUser_withDuplicateLoginId_returnsConflict() throws Exception {
         // given
         String url = "/api/users/{id}";
         UpdateUserRequest request = new UpdateUserRequest(
                 "already_existing_user",
                 "new_password",
-                "new_display_name"
+                "new_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -241,13 +241,13 @@ class UserControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void updateUser_withBlankUserName_returnsBadRequest() throws Exception {
+    void updateUser_withBlankLoginId_returnsBadRequest() throws Exception {
         // given
         String url = "/api/users/{id}";
         UpdateUserRequest request = new UpdateUserRequest(
                 "",
                 "new_password",
-                "new_display_name"
+                "new_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -265,9 +265,9 @@ class UserControllerTest extends ControllerTestSupport {
         // given
         String url = "/api/users/{id}";
         UpdateUserRequest request = new UpdateUserRequest(
-                "new_username",
+                "new_loginId",
                 "",
-                "new_display_name"
+                "new_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -281,11 +281,11 @@ class UserControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void updateUser_withBlankDisplayName_returnsBadRequest() throws Exception {
+    void updateUser_withBlankNickname_returnsBadRequest() throws Exception {
         // given
         String url = "/api/users/{id}";
         UpdateUserRequest request = new UpdateUserRequest(
-                "new_username",
+                "new_loginId",
                 "new_password",
                 ""
         );

@@ -28,16 +28,16 @@ public class AuthController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "User Registered"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "409", description = "Username already exists")
+            @ApiResponse(responseCode = "409", description = "Login id already exists")
     })
     @PostMapping("/register")
     public ResponseEntity<Void> registerUser(
             @Valid @RequestBody RegisterRequest request
     ) {
         userService.createUser(new CreateUserRequest(
-                request.username(),
+                request.loginId(),
                 request.password(),
-                request.displayName()
+                request.nickname()
         ));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

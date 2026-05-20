@@ -1,8 +1,11 @@
 package com.springboard.cms_api.auth;
 
+import com.springboard.cms_api.auth.dto.LoginRequest;
+import com.springboard.cms_api.auth.dto.LoginRequest;
 import com.springboard.cms_api.auth.dto.RegisterRequest;
 import com.springboard.cms_api.support.ControllerTestSupport;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -22,19 +25,19 @@ class AuthControllerTest extends ControllerTestSupport {
     PasswordEncoder passwordEncoder;
 
     private Long testUserId;
-    private String testUsername;
+    private String testLoginId;
     private String rawPassword;
 
     @BeforeEach
     void setUp() {
-        testUsername = "auth_test_user";
+        testLoginId = "auth_test_user";
         rawPassword = "password1234";
 
         jdbcTemplate.update("""
-            INSERT INTO users (username, password, display_name)
+            INSERT INTO users (login_id, password, nickname)
             VALUES (?, ?, ?)
             """,
-                testUsername,
+                testLoginId,
                 passwordEncoder.encode(rawPassword),
                 "Auth Test User"
         );
@@ -42,8 +45,8 @@ class AuthControllerTest extends ControllerTestSupport {
         testUserId = jdbcTemplate.queryForObject("""
             SELECT id
             FROM users
-            WHERE username = ?
-            """, Long.class, testUsername);
+            WHERE login_id = ?
+            """, Long.class, testLoginId);
     }
 
     @Test
@@ -53,7 +56,7 @@ class AuthControllerTest extends ControllerTestSupport {
         RegisterRequest request = new RegisterRequest(
                 "new_auth_user",
                 rawPassword,
-                "test_display_name"
+                "test_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -67,13 +70,13 @@ class AuthControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void register_withDuplicateUsername_returnsConflict() throws Exception {
+    void register_withDuplicateLoginId_returnsConflict() throws Exception {
         // given
         String url = "/api/auth/register";
         RegisterRequest request = new RegisterRequest(
-                testUsername,
+                testLoginId,
                 rawPassword,
-                "test_display_name"
+                "test_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -87,13 +90,13 @@ class AuthControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void register_withBlankUsername_returnsBadRequest() throws Exception {
+    void register_withBlankLoginId_returnsBadRequest() throws Exception {
         // given
         String url = "/api/auth/register";
         RegisterRequest request = new RegisterRequest(
                 "",
                 rawPassword,
-                "test_display_name"
+                "test_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -113,7 +116,7 @@ class AuthControllerTest extends ControllerTestSupport {
         RegisterRequest request = new RegisterRequest(
                 "new_auth_user",
                 "",
-                "test_display_name"
+                "test_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -133,7 +136,7 @@ class AuthControllerTest extends ControllerTestSupport {
         RegisterRequest request = new RegisterRequest(
                 "new_auth_user",
                 "123",
-                "test_display_name"
+                "test_nickname"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -147,7 +150,7 @@ class AuthControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void register_withBlankDisplayName_returnsBadRequest() throws Exception {
+    void register_withBlankNickname_returnsBadRequest() throws Exception {
         // given
         String url = "/api/auth/register";
         RegisterRequest request = new RegisterRequest(
@@ -164,5 +167,16 @@ class AuthControllerTest extends ControllerTestSupport {
 
         // then
         result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Disabled("TODO: implement login API")
+    void login_withValidCredentials_returnsNoContent() throws Exception {
+        // given
+        String url = "/api/auth/login";
+        LoginRequest request = new LoginRequest(
+                testLoginId,
+                rawPassword
+        );
     }
 }

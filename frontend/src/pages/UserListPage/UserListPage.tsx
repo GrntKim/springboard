@@ -24,7 +24,7 @@ export default function UserListPage() {
             <div className="page-content">
                 <ul>
                     {users.map((user) => (
-                        <li key={user.id}><Link to={`/users/${user.id}`}>{user.displayName}</Link></li>
+                        <li key={user.id}><Link to={`/users/${user.id}`}>{user.nickname}</Link></li>
                     ))}
                 </ul>
             </div>

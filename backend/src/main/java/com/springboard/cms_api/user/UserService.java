@@ -28,9 +28,9 @@ public class UserService {
         }
     }
 
-    public void validateDuplicateUsername(String username) {
-        if(userRepository.existsByUsername(username)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists.");
+    public void validateDuplicateLoginId(String loginId) {
+        if(userRepository.existsByLoginId(loginId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Login id already exists.");
         }
     }
 
@@ -43,24 +43,24 @@ public class UserService {
 
 
     public void createUser(CreateUserRequest request) {
-        validateDuplicateUsername(request.username());
+        validateDuplicateLoginId(request.loginId());
 
         userRepository.save(
-                request.username(),
+                request.loginId(),
                 passwordEncoder.encode(request.password()),
-                request.displayName()
+                request.nickname()
         );
     }
 
     public void updateUser(Long id, @Valid UpdateUserRequest request) {
         validateUserIdExists(id);
         String encodedPassword = passwordEncoder.encode(request.password());
-        validateDuplicateUsername(request.username());
+        validateDuplicateLoginId(request.loginId());
         userRepository.update(
                 id,
-                request.username(),
+                request.loginId(),
                 encodedPassword,
-                request.displayName()
+                request.nickname()
         );
     }
 

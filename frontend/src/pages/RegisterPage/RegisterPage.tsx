@@ -4,24 +4,24 @@ import { createUser } from "../../api/users";
 import { API_ERROR_MESSAGE, getApiErrorMessage, HTTP_STATUS } from "../../api/error";
 
 export default function RegisterPage() {
-    const [username, setUsername] = useState<string>("");
+    const [loginId, setLoginId] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [displayName, setDisplayName] = useState<string>("");
+    const [nickname, setNickname] = useState<string>("");
     const [message, setMessage] = useState<string>("");
 
     function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
-        createUser({ username, password, displayName, })
+        createUser({ loginId, password, nickname, })
             .then(() => {
                 setMessage("User registered successfully.");
-                setUsername("");
+                setLoginId("");
                 setPassword("");
-                setDisplayName("");
+                setNickname("");
             })
             .catch((error) => { 
                 setMessage(getApiErrorMessage(error, {
                     [HTTP_STATUS.BAD_REQUEST]: API_ERROR_MESSAGE.BAD_REQUEST,
-                    [HTTP_STATUS.CONFLICT]: "Username already exists.",
+                    [HTTP_STATUS.CONFLICT]: "LoginId already exists.",
                 }));
             });
     }
@@ -35,12 +35,12 @@ export default function RegisterPage() {
             <div className="page-content">
                 <form onSubmit={handleSubmit}>
                     <div>
-                        <label htmlFor="username">Username</label>
+                        <label htmlFor="loginId">LoginId</label>
                         <input
-                            id="username"
-                            name="username"
-                            value={username}
-                            onChange={(event) => setUsername(event.target.value)}
+                            id="loginId"
+                            name="loginId"
+                            value={loginId}
+                            onChange={(event) => setLoginId(event.target.value)}
                         />
                     </div>
                     <div>
@@ -54,12 +54,12 @@ export default function RegisterPage() {
                         />
                     </div>
                     <div>
-                        <label htmlFor="displayName">DisplayName</label>
+                        <label htmlFor="nickname">Nickname</label>
                         <input
-                            id="displayName"
-                            name="displayName"
-                            value={displayName}
-                            onChange={(event) => setDisplayName(event.target.value)}
+                            id="nickname"
+                            name="nickname"
+                            value={nickname}
+                            onChange={(event) => setNickname(event.target.value)}
                         />
                     </div>
                     <button type="submit">Register</button>

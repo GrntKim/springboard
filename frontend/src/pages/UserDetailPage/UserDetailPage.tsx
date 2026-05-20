@@ -63,17 +63,17 @@ export default function UserDetailPage() {
     return (
         <div className="main">
             <h1 className="page-title">
-                {user.displayName}'s Page
+                {user.nickname}'s Page
             </h1>
             <div className="page-content">
                 <div className="user-info">
                     <p>id: {user.id}</p>
-                    <p>username: {user.username}</p>
-                    <p>displayName: {user.displayName}</p>
+                    <p>loginId: {user.loginId}</p>
+                    <p>nickname: {user.nickname}</p>
                     <p>createdAt: {user.createdAt}</p>
                 </div>
                 <h1 className="page-title">
-                    {user.displayName}'s Posts
+                    {user.nickname}'s Posts
                 </h1>
                 {posts.length === 0 ? (
                     <p>No posts yet..</p>

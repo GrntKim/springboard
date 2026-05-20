@@ -33,7 +33,7 @@ class CommentControllerTest extends ControllerTestSupport {
     void setUp() {
         // 1. Add a post writer and comment writer
         jdbcTemplate.update("""
-            INSERT INTO users (username, password, display_name)
+            INSERT INTO users (login_id, password, nickname)
             VALUES (?, ?, ?), (?, ?, ?)
             """, "post_writer", "password", "Post Writer",
                 "comment_writer", "password1", "Comment Writer");
@@ -42,12 +42,12 @@ class CommentControllerTest extends ControllerTestSupport {
         postWriterId = jdbcTemplate.queryForObject("""
             SELECT id
             FROM users
-            WHERE username = ? AND deleted_at IS NULL
+            WHERE login_id = ? AND deleted_at IS NULL
             """, Long.class, "post_writer");
         commentWriterId = jdbcTemplate.queryForObject("""
             SELECT id
             FROM users
-            WHERE username = ? AND deleted_at IS NULL
+            WHERE login_id = ? AND deleted_at IS NULL
             """, Long.class, "comment_writer");
 
         // 3. Write a post using that post writer's ID

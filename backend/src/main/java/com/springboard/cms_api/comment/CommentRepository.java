@@ -32,7 +32,7 @@ public class CommentRepository {
                     c.id,
                     c.post_id,
                     c.user_id,
-                    u.display_name AS author_name,
+                    u.nickname AS author_name,
                     c.content,
                     c.created_at
                 FROM comments c
@@ -59,7 +59,7 @@ public class CommentRepository {
                     c.id,
                     c.post_id,
                     c.user_id,
-                    u.display_name AS author_name,
+                    u.nickname AS author_name,
                     c.content,
                     c.created_at
                 FROM comments c
@@ -87,7 +87,7 @@ public class CommentRepository {
                     c.id,
                     c.post_id,
                     c.user_id,
-                    u.display_name AS author_name,
+                    u.nickname AS author_name,
                     c.content,
                     c.created_at
                 FROM comments c

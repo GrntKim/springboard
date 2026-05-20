@@ -48,7 +48,7 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "User created"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "409", description = "Username already exists")
+            @ApiResponse(responseCode = "409", description = "Login id already exists")
     })
     @PostMapping
     public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserRequest request) {
@@ -61,7 +61,7 @@ public class UserController {
             @ApiResponse(responseCode = "204", description = "User updated"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
             @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "409", description = "Username already exists")
+            @ApiResponse(responseCode = "409", description = "Login id already exists")
     })
     @PutMapping("/{userId}")
     public ResponseEntity<Void> updateUser(
