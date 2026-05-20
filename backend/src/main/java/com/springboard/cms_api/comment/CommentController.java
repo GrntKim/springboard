@@ -6,6 +6,7 @@ import com.springboard.cms_api.comment.dto.UpdateCommentRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,13 +60,15 @@ public class CommentController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Comment created"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "404", description = "Post or user not found")
+            @ApiResponse(responseCode = "401", description = "Login required"),
+            @ApiResponse(responseCode = "404", description = "Post not found")
     })
     @PostMapping("/comments")
     public ResponseEntity<Void> createComment(
-            @Valid @RequestBody CreateCommentRequest request
+            @Valid @RequestBody CreateCommentRequest request,
+            HttpSession session
     ) {
-        commentService.createComment(request);
+        commentService.createComment(request, session);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

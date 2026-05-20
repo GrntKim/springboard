@@ -7,9 +7,6 @@ public record CreateCommentRequest(
         @NotNull
         Long postId,
 
-        @NotNull
-        Long userId,
-
         @NotBlank
         String content
 ) {

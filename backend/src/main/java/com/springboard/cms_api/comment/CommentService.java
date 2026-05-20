@@ -1,10 +1,12 @@
 package com.springboard.cms_api.comment;
 
+import com.springboard.cms_api.auth.AuthService;
 import com.springboard.cms_api.comment.dto.CommentResponse;
 import com.springboard.cms_api.comment.dto.CreateCommentRequest;
 import com.springboard.cms_api.comment.dto.UpdateCommentRequest;
 import com.springboard.cms_api.post.PostRepository;
 import com.springboard.cms_api.user.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,11 +20,13 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final AuthService authService;
 
-    public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository) {
+    public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository, AuthService authService) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.authService = authService;
     }
 
     public void validateCommentIdExists(Long id) {
@@ -57,12 +61,16 @@ public class CommentService {
         return commentRepository.findById(commentId);
     }
 
-    public void createComment(@Valid CreateCommentRequest request) {
+    public void createComment(
+            @Valid CreateCommentRequest request,
+            HttpSession session
+    ) {
+        Long userId = authService.getLoginUserId(session);
         validatePostIdExists(request.postId());
-        validateUserIdExists(request.userId());
+
         commentRepository.save(
                 request.postId(),
-                request.userId(),
+                userId,
                 request.content()
         );
     }

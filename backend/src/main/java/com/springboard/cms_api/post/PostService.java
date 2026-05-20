@@ -1,9 +1,11 @@
 package com.springboard.cms_api.post;
 
+import com.springboard.cms_api.auth.AuthService;
 import com.springboard.cms_api.post.dto.CreatePostRequest;
 import com.springboard.cms_api.post.dto.PostResponse;
 import com.springboard.cms_api.post.dto.UpdatePostRequest;
 import com.springboard.cms_api.user.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,10 +18,12 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final AuthService authService;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, AuthService authService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.authService = authService;
     }
 
     public void validatePostIdExists(Long id) {
@@ -48,10 +52,13 @@ public class PostService {
         return postRepository.findById(id);
     }
 
-    public void createPost(CreatePostRequest request) {
-        validateUserIdExists(request.userId());
+    public void createPost(
+            CreatePostRequest request,
+            HttpSession session
+    ) {
+        Long userId = authService.getLoginUserId(session);
         postRepository.save(
-                request.userId(),
+                userId,
                 request.title(),
                 request.content()
         );

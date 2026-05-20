@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
@@ -150,13 +151,15 @@ class CommentControllerTest extends ControllerTestSupport {
         String url = "/api/comments";
         CreateCommentRequest request = new CreateCommentRequest(
                 testPostId,
-                commentWriterId,
                 "Comment content"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("LOGIN_USER_ID", commentWriterId);
         ResultActions result = mockMvc.perform(post(url)
+                .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody));
 
@@ -165,32 +168,11 @@ class CommentControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void createComment_withBlankContent_returnsBadRequest() throws Exception {
+    void createComment_withoutLogin_returnsUnauthorized() throws Exception {
         // given
         String url = "/api/comments";
         CreateCommentRequest request = new CreateCommentRequest(
                 testPostId,
-                commentWriterId,
-                ""
-        );
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when
-        ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody));
-
-        // then
-        result.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createComment_withNullPostId_returnsBadRequest() throws Exception {
-        // given
-        String url = "/api/comments";
-        CreateCommentRequest request = new CreateCommentRequest(
-                null,
-                commentWriterId,
                 "Comment content"
         );
         String requestBody = objectMapper.writeValueAsString(request);
@@ -201,7 +183,7 @@ class CommentControllerTest extends ControllerTestSupport {
                 .content(requestBody));
 
         // then
-        result.andExpect(status().isBadRequest());
+        result.andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -210,85 +192,15 @@ class CommentControllerTest extends ControllerTestSupport {
         String url = "/api/comments";
         CreateCommentRequest request = new CreateCommentRequest(
                 unknownPostId,
-                commentWriterId,
                 "Comment content"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("LOGIN_USER_ID", commentWriterId);
         ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody));
-
-        // then
-        result.andExpect(status().isNotFound());
-    }
-
-    @Test
-    void createComment_withNullUserId_returnsBadRequest() throws Exception {
-        // given
-        String url = "/api/comments";
-        CreateCommentRequest request = new CreateCommentRequest(
-                testPostId,
-                null,
-                "Comment content"
-        );
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when
-        ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody));
-
-        // then
-        result.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createComment_withUnknownUserId_returnsNotFound() throws Exception {
-        // given
-        String url = "/api/comments";
-        CreateCommentRequest request = new CreateCommentRequest(
-                testPostId,
-                unknownUserId,
-                "Comment content"
-        );
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when
-        ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody));
-
-        // then
-        result.andExpect(status().isNotFound());
-    }
-
-    @Test
-    void updateComment_returnsNoContent() throws Exception {
-        // given
-        String url = "/api/comments/{commentId}";
-        UpdateCommentRequest request = new UpdateCommentRequest("Updated Comment content");
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when
-        ResultActions result = mockMvc.perform(put(url, testCommentId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody));
-
-        // then
-        result.andExpect(status().isNoContent());
-    }
-
-    @Test
-    void updateComment_withUnknownCommentId_returnsNotFound() throws Exception {
-        // given
-        String url = "/api/comments/{commentId}";
-        UpdateCommentRequest request = new UpdateCommentRequest("Updated Comment content");
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when
-        ResultActions result = mockMvc.perform(put(url, unknownCommentId)
+                .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody));
 

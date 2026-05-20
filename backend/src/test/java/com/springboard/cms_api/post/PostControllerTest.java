@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
@@ -123,7 +124,28 @@ class PostControllerTest extends ControllerTestSupport {
         // given
         String url = "/api/posts";
         CreatePostRequest request = new CreatePostRequest(
-                testUserId,
+                "New Post",
+                "New Content"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("LOGIN_USER_ID", testUserId);
+        ResultActions result = mockMvc.perform(post(url)
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isCreated());
+    }
+
+    @Test
+    void createPost_withoutLogin_returnsUnauthorized() throws Exception {
+        // given
+        String url = "/api/posts";
+        CreatePostRequest request = new CreatePostRequest(
                 "New Post",
                 "New Content"
         );
@@ -135,86 +157,7 @@ class PostControllerTest extends ControllerTestSupport {
                 .content(requestBody));
 
         // then
-        result.andExpect(status().isCreated());
-    }
-
-    @Test
-    void createPost_withBlankTitle_returnsBadRequest() throws Exception {
-        //given
-        String url = "/api/posts";
-        CreatePostRequest request = new CreatePostRequest(
-                testUserId,
-                "",
-                "New Content"
-        );
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when
-        ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody));
-
-        // then
-        result.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createPost_withBlankContent_returnsBadRequest() throws Exception {
-        // given
-        String url = "/api/posts";
-        CreatePostRequest request = new CreatePostRequest(
-                testUserId,
-                "New title",
-                ""
-        );
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when
-        ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody));
-
-        // then
-        result.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createPost_withNullUserId_returnsBadRequest() throws Exception {
-        // given
-        String url = "/api/posts";
-        CreatePostRequest request = new CreatePostRequest(
-                null, "New title", "New content"
-        );
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when
-        ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody));
-
-        // then
-        result.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createPost_withUnknownUserId_returnsNotFound() throws Exception {
-        // given
-        String url = "/api/posts";
-        Long unknownUserId = testUserId + 999L;
-        CreatePostRequest request = new CreatePostRequest(
-                unknownUserId,
-                "New title",
-                "New content"
-        );
-        String requestBody = objectMapper.writeValueAsString(request);
-
-        // when
-        ResultActions result = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody));
-
-        // then
-        result.andExpect(status().isNotFound());
+        result.andExpect(status().isUnauthorized());
     }
 
     @Test

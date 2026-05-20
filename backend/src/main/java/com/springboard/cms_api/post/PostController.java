@@ -6,6 +6,7 @@ import com.springboard.cms_api.post.dto.UpdatePostRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,11 +60,14 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Post created"),
             @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "404", description = "User not found")
+            @ApiResponse(responseCode = "401", description = "Login required")
     })
     @PostMapping("/posts")
-    public ResponseEntity<Void> createPost(@Valid @RequestBody CreatePostRequest request) {
-        postService.createPost(request);
+    public ResponseEntity<Void> createPost(
+            @Valid @RequestBody CreatePostRequest request,
+            HttpSession session
+    ) {
+        postService.createPost(request, session);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

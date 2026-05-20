@@ -62,4 +62,16 @@ public class AuthService {
     public void logout(HttpSession session) {
         session.invalidate();
     }
+
+    public Long getLoginUserId(HttpSession session) {
+        Long userId = (Long) session.getAttribute(LOGIN_USER_ID);
+
+        if (userId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Login required."
+            );
+        }
+        return userId;
+    }
 }
