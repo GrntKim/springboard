@@ -1,11 +1,9 @@
 package com.springboard.cms_api.auth;
 
 import com.springboard.cms_api.auth.dto.LoginRequest;
-import com.springboard.cms_api.auth.dto.LoginRequest;
 import com.springboard.cms_api.auth.dto.RegisterRequest;
 import com.springboard.cms_api.support.ControllerTestSupport;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -170,7 +168,6 @@ class AuthControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    @Disabled("TODO: implement login API")
     void login_withValidCredentials_returnsNoContent() throws Exception {
         // given
         String url = "/api/auth/login";
@@ -178,5 +175,90 @@ class AuthControllerTest extends ControllerTestSupport {
                 testLoginId,
                 rawPassword
         );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    void login_withUnknownLoginId_returnsUnauthorized() throws Exception {
+        // given
+        String url = "/api/auth/login";
+        LoginRequest request = new LoginRequest(
+                "Unknown_login_id",
+                rawPassword
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void login_withWrongPassword_returnsUnauthorized() throws Exception {
+        // given
+        String url = "/api/auth/login";
+        LoginRequest request = new LoginRequest(
+                testLoginId,
+                "Unknown-password"
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void login_withBlankLoginId_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/auth/login";
+        LoginRequest request = new LoginRequest(
+                "",
+                rawPassword
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void login_withBlankPassword_returnsBadRequest() throws Exception {
+        // given
+        String url = "/api/auth/login";
+        LoginRequest request = new LoginRequest(
+                testLoginId,
+                ""
+        );
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isBadRequest());
     }
 }

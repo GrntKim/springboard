@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserRepository {
@@ -45,6 +46,22 @@ public class UserRepository {
                 rs.getString("nickname"),
                 rs.getTimestamp("created_at").toLocalDateTime()
         ), id);
+    }
+
+    public Optional<UserAccount> findByLoginId(String loginId) {
+        String sql = """
+                SELECT id, login_id, password, nickname
+                FROM users
+                WHERE login_id = ? AND deleted_at IS NULL
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new UserAccount (
+                rs.getLong("id"),
+                rs.getString("login_id"),
+                rs.getString("password"),
+                rs.getString("nickname")
+        ), loginId)
+                .stream()
+                .findFirst();
     }
 
     public boolean existsByLoginId(String loginId) {
