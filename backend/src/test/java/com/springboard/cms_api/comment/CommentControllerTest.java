@@ -20,6 +20,7 @@ class CommentControllerTest extends ControllerTestSupport {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private Long otherUserId;
     private Long postWriterId;
     private Long commentWriterId;
 
@@ -29,6 +30,9 @@ class CommentControllerTest extends ControllerTestSupport {
     private Long unknownCommentId;
     private Long unknownPostId;
     private Long unknownUserId;
+
+    MockHttpSession session;
+    MockHttpSession otherUserSession;
 
     @BeforeEach
     void setUp() {
@@ -77,7 +81,22 @@ class CommentControllerTest extends ControllerTestSupport {
             WHERE post_id = ? AND user_id = ? AND deleted_at IS NULL
             """, Long.class, testPostId, commentWriterId);
 
-        // 7. setup unknown IDs
+        // 7. Setup Other user and session
+        jdbcTemplate.update("""
+            INSERT INTO users (login_id, password, nickname)
+            VALUES (?, ?, ?)
+            """, "other_post_user", "password", "Other User");
+
+        // 7. setup other user, session, unknown IDs
+        otherUserId = jdbcTemplate.queryForObject("""
+            SELECT id
+            FROM users
+            WHERE login_id = ?
+            """, Long.class, "other_post_user");
+        session = new MockHttpSession();
+        session.setAttribute("LOGIN_USER_ID", commentWriterId);
+        otherUserSession = new MockHttpSession();
+        otherUserSession.setAttribute("LOGIN_USER_ID", otherUserId);
         unknownCommentId = testCommentId + 999L;
         unknownPostId = testPostId + 999L;
         unknownUserId = postWriterId + 999L;
@@ -209,10 +228,27 @@ class CommentControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void updateComment_blankContent_returnsBadRequest() throws Exception {
+    void updateComment_returnsNoContent() throws Exception {
         // given
         String url = "/api/comments/{commentId}";
-        UpdateCommentRequest request = new UpdateCommentRequest("");
+        UpdateCommentRequest request = new UpdateCommentRequest("Updated_content");
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, testCommentId)
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    void updateComment_withNoLogin_returnsUnauthorized() throws Exception {
+        // given
+        String url = "/api/comments/{commentId}";
+        UpdateCommentRequest request = new UpdateCommentRequest("Updated_content");
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when
@@ -221,7 +257,41 @@ class CommentControllerTest extends ControllerTestSupport {
                 .content(requestBody));
 
         // then
-        result.andExpect(status().isBadRequest());
+        result.andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updateComment_withOtherUserSession_returnsForbidden() throws Exception {
+        // given
+        String url = "/api/comments/{commentId}";
+        UpdateCommentRequest request = new UpdateCommentRequest("Updated_content");
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, testCommentId)
+                .session(otherUserSession)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateComment_withUnknownCommentId_returnsNotFound() throws Exception {
+        // given
+        String url = "/api/comments/{commentId}";
+        UpdateCommentRequest request = new UpdateCommentRequest("Updated_content");
+        String requestBody = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url, unknownCommentId)
+                .session(otherUserSession)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // then
+        result.andExpect(status().isNotFound());
     }
 
     @Test
@@ -230,10 +300,36 @@ class CommentControllerTest extends ControllerTestSupport {
         String url = "/api/comments/{id}";
 
         // when
-        ResultActions result = mockMvc.perform(delete(url, testCommentId));
+        ResultActions result = mockMvc.perform(delete(url, testCommentId)
+                .session(session));
 
         // then
         result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteComment_withNoLogin_returnsUnauthorized() throws Exception {
+        // given
+        String url = "/api/comments/{id}";
+
+        // when
+        ResultActions result = mockMvc.perform(delete(url, testCommentId));
+
+        // then
+        result.andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void deleteComment_withOtherUserSession_returnsForbidden() throws Exception {
+        // given
+        String url = "/api/comments/{id}";
+
+        // when
+        ResultActions result = mockMvc.perform(delete(url, testCommentId)
+                .session(otherUserSession));
+
+        // then
+        result.andExpect(status().isForbidden());
     }
 
     @Test
@@ -242,7 +338,8 @@ class CommentControllerTest extends ControllerTestSupport {
         String url = "/api/comments/{id}";
 
         // when
-        ResultActions result = mockMvc.perform(delete(url, unknownCommentId));
+        ResultActions result = mockMvc.perform(delete(url, unknownCommentId)
+                .session(session));
 
         // then
         result.andExpect(status().isNotFound());
@@ -252,7 +349,9 @@ class CommentControllerTest extends ControllerTestSupport {
     void deleteComment_excludesCommentFromList() throws Exception {
         // given
         String deleteUrl = "/api/comments/{commentId}";
-        mockMvc.perform(delete(deleteUrl, testCommentId)).andExpect(status().isNoContent());
+        mockMvc.perform(delete(deleteUrl, testCommentId)
+                .session((session)))
+                .andExpect(status().isNoContent());
         String getUrl = "/api/comments";
 
         // when

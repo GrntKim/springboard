@@ -59,7 +59,6 @@ public class CommentController {
     @Operation(summary = "Create comment")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Comment created"),
-            @ApiResponse(responseCode = "400", description = "Invalid request"),
             @ApiResponse(responseCode = "401", description = "Login required"),
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
@@ -75,26 +74,33 @@ public class CommentController {
     @Operation(summary = "Update comment")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Comment updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "401", description = "Login required"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "404", description = "Comment not found")
     })
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<Void> updateComment(
             @PathVariable Long commentId,
-            @Valid @RequestBody UpdateCommentRequest request
-            ) {
-        commentService.updateComment(commentId, request);
+            @Valid @RequestBody UpdateCommentRequest request,
+            HttpSession session
+    ) {
+        commentService.updateComment(commentId, request, session);
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Delete comment")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Comment deleted"),
+            @ApiResponse(responseCode = "204", description = "Comment updated"),
+            @ApiResponse(responseCode = "401", description = "Login required"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "404", description = "Comment not found")
     })
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
-        commentService.deleteComment(commentId);
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long commentId,
+            HttpSession session
+    ) {
+        commentService.deleteComment(commentId, session);
         return ResponseEntity.noContent().build();
     }
 }

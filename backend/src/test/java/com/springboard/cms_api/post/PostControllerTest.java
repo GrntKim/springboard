@@ -17,9 +17,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class PostControllerTest extends ControllerTestSupport {
 
+    private MockHttpSession session;
+    private MockHttpSession otherUserSession;
     private Long testPostId;
     private Long testUserId;
+    private Long otherUserId;
     private Long unknownUserId;
+    private Long unknownPostId;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -51,7 +55,28 @@ class PostControllerTest extends ControllerTestSupport {
             WHERE title = ?
             """, Long.class, "Test Post");
 
-        // 5. Set unknown User ID for testing edge cases
+        // 5. Set unknown User and Post ID for testing edge cases
+        unknownPostId = testPostId + 999L;
+
+        // 6. Set session for testUser
+        session = new MockHttpSession();
+        session.setAttribute("LOGIN_USER_ID", testUserId);
+
+        // 7. Setup Other user and session
+        jdbcTemplate.update("""
+            INSERT INTO users (login_id, password, nickname)
+            VALUES (?, ?, ?)
+            """, "other_post_user", "password", "Other User");
+
+        otherUserId = jdbcTemplate.queryForObject("""
+            SELECT id
+            FROM users
+            WHERE login_id = ?
+            """, Long.class, "other_post_user");
+
+        otherUserSession = new MockHttpSession();
+        otherUserSession.setAttribute("LOGIN_USER_ID", otherUserId);
+
         unknownUserId = testUserId + 999L;
     }
 
@@ -130,8 +155,6 @@ class PostControllerTest extends ControllerTestSupport {
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("LOGIN_USER_ID", testUserId);
         ResultActions result = mockMvc.perform(post(url)
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -171,6 +194,7 @@ class PostControllerTest extends ControllerTestSupport {
 
         // when
         ResultActions result = mockMvc.perform(put(url, testPostId)
+                        .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody));
 
@@ -179,11 +203,11 @@ class PostControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void updatePost_withBlankTitle_returnsBadRequest() throws Exception {
+    void updatePost_withoutLogin_returnsUnauthorized() throws Exception {
         // given
         String url = "/api/posts/{id}";
         UpdatePostRequest request = new UpdatePostRequest(
-                "", "Updated content"
+                "Updated title", "Updated content"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
@@ -193,39 +217,40 @@ class PostControllerTest extends ControllerTestSupport {
                 .content(requestBody));
 
         // then
-        result.andExpect(status().isBadRequest());
+        result.andExpect(status().isUnauthorized());
     }
 
     @Test
-    void updatePost_withBlankContent_returnsBadRequest() throws Exception {
+    void updatePost_withOtherUserSession_returnsForbidden() throws Exception {
         // given
         String url = "/api/posts/{id}";
         UpdatePostRequest request = new UpdatePostRequest(
-                "Updated title", ""
+                "Updated title", "Updated content"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when
         ResultActions result = mockMvc.perform(put(url, testPostId)
+                .session(otherUserSession)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody));
 
         // then
-        result.andExpect(status().isBadRequest());
+        result.andExpect(status().isForbidden());
     }
 
     @Test
     void updatePost_withUnknownPostId_returnsNotFound() throws Exception {
         // given
         String url = "/api/posts/{id}";
-        Long unknownPostId = testPostId + 999L;
         UpdatePostRequest request = new UpdatePostRequest(
-                "New title", "New content"
+                "Updated title", "Updated content"
         );
         String requestBody = objectMapper.writeValueAsString(request);
 
         // when
         ResultActions result = mockMvc.perform(put(url, unknownPostId)
+                .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody));
 
@@ -239,30 +264,45 @@ class PostControllerTest extends ControllerTestSupport {
         String url = "/api/posts/{id}";
 
         // when
-        ResultActions result = mockMvc.perform(delete(url, testPostId));
+        ResultActions result = mockMvc.perform(delete(url, testPostId)
+                .session(session));
 
         // then
         result.andExpect(status().isNoContent());
     }
 
     @Test
-    void deletePost_withUnknownId_returnsNotFound() throws Exception {
+    void deletePost_withoutLogin_returnsUnauthorized() throws Exception {
         // given
         String url = "/api/posts/{id}";
-        Long unknownPostId = testPostId + 999L;
 
         // when
-        ResultActions result = mockMvc.perform(delete(url, unknownPostId));
+        ResultActions result = mockMvc.perform(delete(url, testPostId));
 
         // then
-        result.andExpect(status().isNotFound());
+        result.andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void deletePost_withOtherUserSession_returnsForbidden() throws Exception {
+        // given
+        String url = "/api/posts/{id}";
+
+        // when
+        ResultActions result = mockMvc.perform(delete(url, testPostId)
+                .session(otherUserSession));
+
+        // then
+        result.andExpect(status().isForbidden());
     }
 
     @Test
     void deletePost_excludesPostFromList() throws Exception {
         // given
         String deleteUrl = "/api/posts/{id}";
-        mockMvc.perform(delete(deleteUrl, testPostId)).andExpect(status().isNoContent());
+        mockMvc.perform(delete(deleteUrl, testPostId)
+                .session(session))
+                .andExpect(status().isNoContent());
         String getUrl = "/api/posts";
 
         // when

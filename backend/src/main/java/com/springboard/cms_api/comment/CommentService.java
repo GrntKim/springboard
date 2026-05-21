@@ -5,6 +5,7 @@ import com.springboard.cms_api.comment.dto.CommentResponse;
 import com.springboard.cms_api.comment.dto.CreateCommentRequest;
 import com.springboard.cms_api.comment.dto.UpdateCommentRequest;
 import com.springboard.cms_api.post.PostRepository;
+import com.springboard.cms_api.post.dto.PostResponse;
 import com.springboard.cms_api.user.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -47,6 +48,16 @@ public class CommentService {
         }
     }
 
+    private void validateCommentOwner(Long commentId, Long loginUserId) {
+        CommentResponse comment = commentRepository.findById(commentId);
+        if (!comment.userId().equals(loginUserId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Forbidden"
+            );
+        }
+    }
+
     public List<CommentResponse> getAllComments() {
         return commentRepository.findAll();
     }
@@ -75,13 +86,22 @@ public class CommentService {
         );
     }
 
-    public void updateComment(Long commentId, @Valid UpdateCommentRequest request) {
+    public void updateComment(
+            Long commentId,
+            @Valid UpdateCommentRequest request,
+            HttpSession session
+    ) {
         validateCommentIdExists(commentId);
+        validateCommentOwner(commentId, authService.getLoginUserId(session));
         commentRepository.update(commentId, request.content());
     }
 
-    public void deleteComment(Long commentId) {
+    public void deleteComment(
+            Long commentId,
+            HttpSession session
+    ) {
         validateCommentIdExists(commentId);
+        validateCommentOwner(commentId, authService.getLoginUserId(session));
         commentRepository.delete(commentId);
     }
 

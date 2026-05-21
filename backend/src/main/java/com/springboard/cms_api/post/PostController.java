@@ -74,25 +74,33 @@ public class PostController {
     @Operation(summary = "Update post")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Post updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "404", description = "Post not found"),
+            @ApiResponse(responseCode = "401", description = "Login required"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Post not found")
     })
     @PutMapping("/posts/{postId}")
     public ResponseEntity<Void> updatePost(
             @PathVariable Long postId,
-            @Valid @RequestBody UpdatePostRequest request) {
-        postService.updatePost(postId, request);
+            @Valid @RequestBody UpdatePostRequest request,
+            HttpSession session
+    ) {
+        postService.updatePost(postId, request, session);
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Delete post")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Post deleted"),
+            @ApiResponse(responseCode = "401", description = "Login required"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
     @DeleteMapping("/posts/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
-        postService.deletePost(postId);
+    public ResponseEntity<Void> deletePost(
+            @PathVariable Long postId,
+            HttpSession session
+    ) {
+        postService.deletePost(postId, session);
         return ResponseEntity.noContent().build();
     }
 }

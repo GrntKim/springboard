@@ -38,6 +38,16 @@ public class PostService {
         }
     }
 
+    private void validatePostOwner(Long postId, Long loginUserId) {
+        PostResponse post = postRepository.findById(postId);
+        if (!post.authorId().equals(loginUserId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Forbidden"
+            );
+        }
+    }
+
     public List<PostResponse> getPosts() {
         return postRepository.findAll();
     }
@@ -64,18 +74,28 @@ public class PostService {
         );
     }
 
-    public void updatePost(Long id, @Valid UpdatePostRequest request) {
-        validatePostIdExists(id);
+    public void updatePost(
+            Long postId,
+            @Valid UpdatePostRequest request,
+            HttpSession session
+    ) {
+        validatePostIdExists(postId);
+        validatePostOwner(postId, authService.getLoginUserId(session));
+
         postRepository.update(
-                id,
+                postId,
                 request.title(),
                 request.content()
         );
     }
 
-    public void deletePost(Long id) {
-        validatePostIdExists(id);
-        postRepository.delete(id);
+    public void deletePost(
+            Long postId,
+            HttpSession session
+    ) {
+        validatePostIdExists(postId);
+        validatePostOwner(postId, authService.getLoginUserId(session));
+        postRepository.delete(postId);
     }
 
 }
