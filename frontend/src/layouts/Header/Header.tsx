@@ -1,15 +1,12 @@
+import { useAuth } from '../../auth/useAuth';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import "./Header.css";
-import { Link, NavLink } from 'react-router-dom';
 
 export default function Header() {
+    const { currentUser, isAuthChecked, logout } = useAuth();
+    const navigate = useNavigate();
     return (
         <div className="header-container">
-            <header className="login-status-bar">
-                <ul className="site-links">
-                    <li><NavLink to={"/login"}>Log in</NavLink></li>
-                    <li><NavLink to={"/register"}>Register</NavLink></li>
-                </ul>
-            </header>
             <header className="logo-and-menus-bar">
                 <div className="logo">
                     <Link to={"/"}>CMS</Link>
@@ -22,6 +19,34 @@ export default function Header() {
                         <li><NavLink to={"/users"}>Users</NavLink></li>
                     </ul>
                 </div>
+            </header>
+            <header className="login-status-bar">
+                <ul className="site-links">
+                    {!isAuthChecked && <li>Checking login...</li>}
+                    {isAuthChecked && !currentUser && (
+                        <>
+                            <li><NavLink to={"/login"}>Log in</NavLink></li>
+                            <li><NavLink to={"/register"}>Register</NavLink></li>
+                        </>
+                    )}
+
+                    {isAuthChecked && currentUser && (
+                        <>
+                            <li>Welcome, {currentUser.nickname}</li>
+                            <li>
+                                <NavLink to={`/users/${currentUser.id}`}>My page</NavLink>
+                            </li>
+                            <li>
+                                <button type="button" onClick={() => { 
+                                        logout(); 
+                                        navigate("/"); 
+                                    }}>
+                                    Logout
+                                </button>
+                            </li>
+                        </>
+                    )}
+                </ul>
             </header>
         </div>
     )
