@@ -9,6 +9,7 @@ import UserListPage from './pages/UserListPage/UserListPage';
 import PostDetailPage from './pages/PostDetailPage/PostDetailPage';
 import UserDetailPage from './pages/UserDetailPage/UserDetailPage';
 import './App.css';
+import LoginPage from './pages/LoginPage/LoginPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path='/users/:userId' element={<UserDetailPage />} />
           <Route path='/write' element={<PostWritePage />} />
           <Route path='/register' element={<RegisterPage />} />
+          <Route path='/login' element={<LoginPage />} />
         </Routes>
       </div>
       <Footer />
