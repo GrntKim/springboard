@@ -10,7 +10,6 @@ export type Post = {
 };
 
 export type CreatePostRequest = {
-    userId: number;
     title: string;
     content: string;
 };

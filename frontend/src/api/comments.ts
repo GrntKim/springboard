@@ -11,7 +11,6 @@ export type Comment = {
 
 export type CreateCommentRequest = {
     postId: number;
-    userId: number;
     content: string;
 };
 
