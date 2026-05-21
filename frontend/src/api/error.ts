@@ -5,10 +5,13 @@ export const HTTP_STATUS = {
     NOT_FOUND: 404,
     CONFLICT: 409,
     INTERNAL_SERVER_ERROR: 500,
+    UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
 } as const;
 
 export const API_ERROR_MESSAGE = {
     BAD_REQUEST: "Please check your input.",
+    UNAUTHORIZED: "Login required",
     SERVER_ERROR: "Something went wrong.",
 } as const;
 
