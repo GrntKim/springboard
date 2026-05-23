@@ -1,4 +1,4 @@
-import { useAuth } from '../../auth/useAuth';
+import { useAuth } from '../../hooks/auth';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import "./Header.css";
 
@@ -38,9 +38,10 @@ export default function Header() {
                             </li>
                             <li>
                                 <button type="button" onClick={() => { 
+                                    if (confirm("Are you sure you want to log out?")) {
                                         logout(); 
                                         navigate("/"); 
-                                    }}>
+                                    }}}>
                                     Logout
                                 </button>
                             </li>

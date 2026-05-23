@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/useAuth";
+import { useAuth } from "../../hooks/auth";
 import { getApiErrorMessage, HTTP_STATUS } from "../../api/error";
 import "../pages.css";
 
