@@ -1,31 +1,31 @@
 import { useState } from "react";
-import { createComment } from "../../../../api/comments";
-import { API_ERROR_MESSAGE, getApiErrorMessage, HTTP_STATUS } from "../../../../api/error";
+import { getApiErrorMessage } from "../../../../api/error";
+import { useCreateComment } from "../../../../hooks/comments";
 
 type CommentFormProps = {
     postId: number;
-    onCreated: () => void;
 };
 
-export default function CommentForm({ postId, onCreated }: CommentFormProps) {
+export default function CommentForm({ postId }: CommentFormProps) {
     const [content, setContent] = useState<string>("");
     const [message, setMessage] = useState<string>("");
+    const createCommentMutation = useCreateComment();
 
     function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
-        createComment({ postId, content, })
-            .then(() => {
-                setMessage("Comment created successfully.");
-                setContent("");
-                onCreated();
-            })
-            .catch((error) => {
-                setMessage(getApiErrorMessage(error, {
-                    [HTTP_STATUS.UNAUTHORIZED]: "Login required",
-                    [HTTP_STATUS.NOT_FOUND]: "Post not found",
-                    [HTTP_STATUS.BAD_REQUEST]: API_ERROR_MESSAGE.BAD_REQUEST,
-                }));
-            });
+        setMessage("");
+        createCommentMutation.mutate(
+            { postId, content },
+            {
+                onSuccess: () => {
+                    setMessage("Comment created successfully.");
+                    setContent("");
+                },
+                onError: (error) => {
+                    setMessage(getApiErrorMessage(error));
+                },
+            },
+        );
     }
 
     return (
@@ -38,14 +38,16 @@ export default function CommentForm({ postId, onCreated }: CommentFormProps) {
                 <form onSubmit={handleSubmit}>
                     <div>
                         <label htmlFor="content">Content</label>
-                        <input
+                        <textarea
                             id="content"
                             name="content"
                             value={content}
                             onChange={(event) => setContent(event.target.value)}
                         />
                     </div>
-                    <button type="submit">Create</button>
+                    <button type="submit" disabled={createCommentMutation.isPending}>
+                        {createCommentMutation.isPending ? "Creating..." : "Create"}
+                    </button>
                 </form>
                 
                 {message && <p>{message}</p>}

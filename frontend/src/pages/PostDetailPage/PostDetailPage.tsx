@@ -1,57 +1,38 @@
 import { Link, useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { type Post, getPostById } from "../../api/posts";
-import { type Comment, getCommentsByPostId } from "../../api/comments";
 import { getApiErrorMessage } from "../../api/error";
 import CommentList from "./Components/CommentList/CommentList";
 import CommentForm from "./Components/CommentForm/CommentForm";
 import "../pages.css";
+import { usePost } from "../../hooks/posts";
+import { useCommentsByPostId } from "../../hooks/comments";
 
 export default function PostDetailPage() {
     const { postId } = useParams();
-    const [post, setPost] = useState<Post | null>(null);
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [message, setMessage] = useState<string>("");
-
-    const reloadComments = (postId: number) => {
-        getCommentsByPostId(postId)
-            .then(setComments)
-            .catch((error) => {
-                setMessage(getApiErrorMessage(error));
-            });
-    }
-
     const numericPostId = Number(postId);
 
-    useEffect(() => {
-        if (!postId || Number.isNaN(numericPostId)) return;
+    const {
+        data: post,
+        isPending,
+        isError,
+        error,
+    } = usePost(numericPostId);
 
-        getPostById(numericPostId)
-            .then((post) => {
-                setPost(post);
-            })
-            .catch((error) => {
-                setMessage(getApiErrorMessage(error));
-            });
-        
-        getCommentsByPostId(numericPostId)
-            .then((comments) => {
-                setComments(comments);
-            })
-            .catch((error) => {
-                setMessage(getApiErrorMessage(error));
-            });
-    }, [postId, numericPostId]);
+    const { 
+        data: comments = [],
+        isPending: isCommentsPending,
+        isError: isCommentsError,
+        error: commentsError,
+    } = useCommentsByPostId(numericPostId);
 
     if (!postId || Number.isNaN(numericPostId)) {
         return <p>Invalid post id.</p>;
     }
 
-    if (message) {
-        return <p>{message}</p>
+    if (isError) {
+        return <p>{getApiErrorMessage(error)}</p>
     }
 
-    if (!post) {
+    if (isPending) {
         return <p>Loading...</p>
     }
 
@@ -67,11 +48,14 @@ export default function PostDetailPage() {
                 <Link to={"/posts"}>Go back</Link>
 
                 <div className="comment-section">
-                    <CommentForm 
-                        postId={numericPostId} 
-                        onCreated={() => reloadComments(numericPostId)}
-                    />
-                    <CommentList comments={comments} />
+                    <CommentForm postId={numericPostId} />
+                    {isCommentsPending ? (
+                        <p>Loading comments...</p>
+                    ) : isCommentsError ? (
+                        <p>{getApiErrorMessage(commentsError)}</p>
+                    ) : (
+                        <CommentList comments={comments} />
+                    )}
                 </div>
             </div>
         </div>

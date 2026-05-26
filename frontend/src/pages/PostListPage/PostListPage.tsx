@@ -1,20 +1,27 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import "../pages.css";
-import { getPosts, type Post } from "../../api/posts";
+import { usePosts } from "../../hooks/posts";
 import { getApiErrorMessage } from "../../api/error";
+import "../pages.css";
 
 export default function PostListPage() {
-    const [posts, setPosts] = useState<Post[]>([]);
-    const [message, setMessage] = useState<string>("");
+    const {
+        data: posts = [],
+        isPending,
+        isError,
+        error,
+    } = usePosts();
 
-    useEffect(() => {
-        getPosts()
-            .then(setPosts)
-            .catch((error) => {
-                setMessage(getApiErrorMessage(error));
-            });
-    }, []);
+    if (isPending) {
+        return (
+            <div className="main">
+                <h1 className="page-title">Posts</h1>
+                <div className="page-content">
+                    <p>Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="main">
             <h1 className="page-title">
@@ -37,7 +44,7 @@ export default function PostListPage() {
                         </ul>
                     )}
             </div>
-            {message && <p>{message}</p>}
+            {isError && <p>{getApiErrorMessage(error)}</p>}
         </div>
     );
 }

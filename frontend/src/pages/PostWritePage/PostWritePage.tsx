@@ -1,27 +1,30 @@
 import { useState } from "react";
 import "../pages.css";
-import { createPost } from "../../api/posts";
-import { API_ERROR_MESSAGE, getApiErrorMessage, HTTP_STATUS } from "../../api/error";
+import { getApiErrorMessage } from "../../api/error";
+import { useCreatePost } from "../../hooks/posts";
+import { useNavigate } from "react-router-dom";
 
 export default function PostWritePage() {
     const [title, setTitle] = useState<string>("");
     const [content, setContent] = useState<string>("");
     const [message, setMessage] = useState<string>("");
+    const navigate = useNavigate();
+    const createPostMutation = useCreatePost();
 
     function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
-        createPost({ title, content })
-            .then(() => {
-                setMessage("Post created successfully.");
-                setTitle("");
-                setContent(""); 
-            })
-            .catch((error) => {
-                setMessage(getApiErrorMessage(error, {
-                    [HTTP_STATUS.UNAUTHORIZED]: "Login required",
-                    [HTTP_STATUS.BAD_REQUEST]: API_ERROR_MESSAGE.BAD_REQUEST,
-                }));
-            });
+        setMessage("");
+        createPostMutation.mutate(
+            { title, content },
+            {
+                onSuccess: () => {
+                    navigate("/posts");
+                },
+                onError: (error) => {
+                    setMessage(getApiErrorMessage(error));
+                },
+            },
+        );
     }
 
     return (
@@ -42,14 +45,16 @@ export default function PostWritePage() {
                     </div>
                     <div>
                         <label htmlFor="content">Content</label>
-                        <input
+                        <textarea
                             id="content"
                             name="content"
                             value={content}
                             onChange={(event) => setContent(event.target.value)}
                         />
                     </div>
-                    <button type="submit">Create</button>
+                    <button type="submit" disabled={createPostMutation.isPending}>
+                        {createPostMutation.isPending ? "Creating..." : "Create"}
+                    </button>
                 </form>
                 
                 {message && <p>{message}</p>}
